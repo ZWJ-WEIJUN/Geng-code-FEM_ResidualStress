@@ -1,1 +1,4 @@
+*.npy
 .venv
+thinwall_/
+sqaureblock_/
