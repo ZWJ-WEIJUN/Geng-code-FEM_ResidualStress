@@ -1,2 +1,4 @@
 .venv
-thinwall_test/
+*.npy
+\squareblock_
+\thinwall_test
