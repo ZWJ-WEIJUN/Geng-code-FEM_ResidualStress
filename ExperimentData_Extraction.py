@@ -39,25 +39,41 @@ with open('TW70_NCFR1000_Run20240121.npy', 'rb') as lp:
 # print(fr_layer)
 # print(nodal_T2.size)
 
+# Calculate the extent of the plot    
+left = 0
+right = temp_layers.shape[1]
+bottom = 0
+top = temp_layers.shape[0]
+
+
 # *** Plot Laser Power ***
 plt.rcParams["font.weight"] = "bold"
-layer = np.arange(1, 41, dtype=np.int)
+layer = np.arange(1, 41, dtype=int)
 print(temp_layers)
 
 temp_layers = np.array(temp_layers, dtype=float)
 
 plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
-plt.imshow(temp_layers, cmap='hot', interpolation='nearest')  # Create a heatmap with the data
-plt.colorbar(label='Temperature')  # Add a colorbar to the right of the plot
+plt.imshow(temp_layers, cmap='coolwarm', interpolation='nearest', extent=[left, right, bottom, top],  origin='lower', aspect=0.4)  # Create a heatmap with the data
+cbar =plt.colorbar(label='Temperature', shrink=0.8)  # Add a colorbar to the right of the plot
+# cbar.ax.margins(y=0)  # Make the colorbar narrower
+
+# Add numbers to each cell
+for i in range(temp_layers.shape[0]):
+    for j in range(temp_layers.shape[1]):
+        plt.text(j+0.5, i+0.5, format(temp_layers[i, j], '.0f'),
+                 horizontalalignment="center",
+                 verticalalignment = "center",
+                 color="white" if temp_layers[i, j] > temp_layers.max()/2 else "black", fontsize=8)
 
 # Set up the labels for the x and y axes
-plt.xlabel('Values')
+plt.xlabel('Data Points in X axis')
 plt.ylabel('Layers')
 
 # Set up the ticks for the y axis
 plt.yticks(ticks=np.arange(temp_layers.shape[0]), labels=np.arange(1, temp_layers.shape[0] + 1))
 
-plt.title('Temperature Layers Heatmap')  # Add a title to the plot
+plt.title('Temperature Distribution Layers by Layer')  # Add a title to the plot
 plt.show()  # Display the plot
 # fig, ax1 = plt.subplots()
 # color = 'indianred'
