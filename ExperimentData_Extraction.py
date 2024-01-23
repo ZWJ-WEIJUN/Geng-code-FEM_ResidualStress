@@ -76,7 +76,7 @@ plt.grid(True)
 #********************** Plot medium temperature - END
 
 
-
+#********************** Appendix - for later use - START
 # fig, ax1 = plt.subplots()
 # color = 'indianred'
 # lns1 = ax1.plot(layer, f_layer, linewidth=3, marker='.', markersize=10,
@@ -173,5 +173,6 @@ plt.grid(True)
 
 
 # # # ***********************
+#********************** Appendix - for later use - END
 
 plt.show()
