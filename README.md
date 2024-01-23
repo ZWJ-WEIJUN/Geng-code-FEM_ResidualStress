@@ -1,4 +1,4 @@
-"# Geng-Code" 
+"# Geng-Code" - Notes
 
-Weijun-test-12102023-0623
+This is the code original from Geng, and Weijun use it to run of the 50 layers 80mm long thin wall for OFFLINE laser powder-based and feed rate based energy control. And the deposited thin walls were used for residusl stresss measurement.
 
