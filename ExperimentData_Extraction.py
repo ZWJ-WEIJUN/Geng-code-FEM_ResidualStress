@@ -1,16 +1,88 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.patches import Circle
 from matplotlib.ticker import FormatStrFormatter
+
+
+
+# ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - START
+
+def get_image_coord(Layer):
+    x_start = 20.
+    y_start = 8.
+    z_start = -4.
+
+    Layer_Height = 0.7
+    Length = 70.
+
+    L_Change = 0
+    Layer_Change = 40
+    N_Change = 1
+    N_Data = 7
+    Total_Layer = Layer_Change*N_Change
+
+    Coord = [[0,0,0]]
+
+    x_coord = x_start 
+    y_coord = y_start 
+    z_coord = z_start+Layer_Height
+
+    for i in range(N_Change):
+        x_i = x_start
+        y_i = y_start + i*L_Change/2
+        y_f = y_start + Length - i*L_Change/2
+        z_i = z_start
+        L_inc = (y_f-y_i)/N_Data
+        for j in range(Layer_Change):
+            x_coord = x_i
+            y_coord = y_i
+            Coord.append([x_coord,y_coord,z_coord])
+            for z in range(N_Data):
+                y_coord = y_coord + L_inc
+                y_coord  = round(y_coord,3)
+                Coord.append([x_coord,y_coord,z_coord])
+
+            z_coord = round(z_coord+Layer_Height,3)
+    Coord = Coord[1:]
+
+    # Extract Image Coordinate
+    Indexi = (Layer - 1) *N_Data+(Layer-1)
+    Indexf= (Layer)*N_Data+Layer
+    C_lt = Coord[Indexi:Indexf]
+    C_lt = np.array(C_lt)
+
+
+    date = '20240121'
+    TranMat = np.load('TranMat_'+date+'.npy')
+    C_lt = np.append(C_lt, np.array([1]*(len(C_lt))).reshape(-1,1), axis=1)
+
+    image_coord =[]
+
+    for mc in C_lt:
+        ic = np.round(np.matmul(TranMat,mc)).astype(int)   
+        image_coord.append(ic)
+    image_coord = np.array(image_coord)
+    
+    return image_coord
+
+
+# ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - END
+
+
+
+
 
 with open('TW70_NCFR1000_Run20240121.npy', 'rb') as f:
     temp_layers = np.load(f, allow_pickle=True)
     laser_track = np.load(f, allow_pickle=True)
     lp_array = np.load(f, allow_pickle=True)
     fr_array = np.load(f, allow_pickle=True)
-    temperature_history= np.load(f, allow_pickle=True)
+    Frame_history = np.load(f, allow_pickle=True)
 
-    #Not sure if this is the Medium temperature data or sth else, I need to double check with Muqing
-    # Medium_temperature = np.load(f, allow_pickle=True)
+    # Not sure if this is the Medium temperature data or sth else, I need to double check with Muqing
+    Frame_index = np.load(f, allow_pickle=True)
+    # Exclude the first element of Frame_index
+    Frame_index = Frame_index[1:]
     # Medium_temperature = Medium_temperature[1:]
 
 # Calculate the median temperature for each layer
@@ -20,8 +92,10 @@ Medium_temperature = np.median(temp_layers, axis=1)
 plt.rcParams["font.weight"] = "bold"
 layer = np.arange(1, temp_layers.shape[0]+1, dtype=int)
 print(f'Temperature collected in each layer: {temp_layers}')
-# print(f'laser_track: {laser_track}')
-# print(f'Frame collected with shape: {temperature_history.shape}')
+print(f'laser_track: {laser_track}')
+print(f'Frame collected (np.ndarray): {Frame_history.shape}')
+print(f'Frame index: {Frame_index}')
+
 print(f'Medium temperature: {Medium_temperature}')
 
 # Extract the first sublist from laser_track
@@ -76,103 +150,39 @@ plt.grid(True)
 #********************** Plot medium temperature - END
 
 
-#********************** Appendix - for later use - START
-# fig, ax1 = plt.subplots()
-# color = 'indianred'
-# lns1 = ax1.plot(layer, f_layer, linewidth=3, marker='.', markersize=10,
-#                 color=color, label='Laser power')
-# ax1.tick_params(axis='y', labelcolor=color)
-# ax1.set_xlabel("Layer #")
-# ax1.set_ylabel("Laser Power (kW)", color=color, fontweight='bold')
+#********************** Plot captured Frame - START
+# Iterate over the indices in Frame_index
+for index, frame_index_i in enumerate(Frame_index):
+    print(frame_index_i)
+    # Extract the frame at index i from Frame_history
+    frame = Frame_history[frame_index_i]
 
-# ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-# color = 'tab:blue'
-# ax2.set_ylabel('Substrate Temperature ($^\circ$C)',
-#                color=color, fontweight='bold')
+    # Create a new figure with a custom size
+    fig, ax = plt.subplots()
 
-# lns2 = ax2.plot(layer, np.full((50, ), 600),
-#                 linestyle='dashed', linewidth=3, color='blue', label='Objective Temperature')
-# # ax2.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-# lns3 = ax2.plot(layer, median_temperature, color=color,
-#                 linewidth=3, marker=".", markersize=10, label='Medium Temperature')
-# ax2.tick_params(axis='y', labelcolor=color)
+    imge_coord = get_image_coord(index+1)
 
-# lns = lns1+lns2+lns3
-# labs = [l.get_label() for l in lns]
+    print(f"For the layer #{index+1} , in captured frame #{frame_index_i}, the image coordinate used for calculation is:{imge_coord}")
 
-# plt.legend(lns, labs, loc='lower center', frameafha=0.2)
-# plt.title("Laser Power-Based Energy Control Simulation", fontname="Arial Black",
-#           size=15, fontweight="bold")
-# ***********************
+    for j in imge_coord:
+        center = tuple(j)
+        radius = 1 
+        circle = Circle(center, radius, color = 'yellow', fill=False,linewidth=2)
+        ax.add_patch(circle)
 
-# # #*** Plot Feedrate ***
-# plt.rcParams["font.weight"] = "bold"
-# layer = np.arange(1, 51, dtype=np.int)
-# print(fr_layer*60)
-# fig, ax1 = plt.subplots()
+    # Display the first frame as an image
+    plt.imshow(frame, cmap='coolwarm', interpolation='nearest')
+
+    # Add a colorbar to the right of the plot
+    plt.colorbar(label='Value')
+
+    # Set up the title for the plot
+    plt.title(f'Layer #{index+1}')
 
 
-# color = 'tab:purple'
-# lns1 = ax1.plot(layer, fr_layer*60, linewidth=3, marker='.', markersize=10,
-#                 color=color, label='Feed rate')
-# ax1.tick_params(axis='y', labelcolor=color)
-# ax1.set_xlabel("Layer #", fontweight='bold')
-# ax1.set_ylabel("Feed rate (mm/min)", color=color, fontweight='bold')
 
 
-# ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-# color = 'tab:blue'
-# ax2.set_ylabel('Substrate Temperature ($^\circ$C)',
-#                color=color, fontweight='bold')
-# lns2 = ax2.plot(layer, np.full((50, ), 600),
-#                 linestyle='dashed', linewidth=3, color='blue', label='Objective Temperature')
-# ax2.tick_params(axis='y', labelcolor=color)
-# lns3 = ax2.plot(layer, median_temperature, color=color,
-#                 linewidth=3, marker=".", markersize=10, label='Medium Temperature')
-# lns = lns1+lns2+lns3
-# labs = [l.get_label() for l in lns]
 
-# plt.legend(lns, labs, loc='lower right', frameafha=0.2)
-
-# ax2.plot()
-
-# plt.title("Feed Rate-Based Energy Control Simulation", fontname="Arial Black",
-#           size=15, fontweight="bold")
-# #***********************
-
-# # #*** Plot No Ctrl ***
-# plt.rcParams["font.weight"] = "bold"
-# layer = np.arange(1, 51, dtype=np.int)
-# print(fr_layer*60)
-# fig, ax1 = plt.subplots()
-# color = 'tab:purple'
-# lns1 = ax1.plot(layer, fr_layer*60, linewidth=2, marker='.', markersize=5,
-#                 color=color, label='Feed rate (mm/min)')
-# # ax1.tick_params(axis='y', labelcolor=color)
-# ax1.set_xlabel("Layer #", fontweight='bold')
-# ax1.set_ylabel("Deposition Parameters", fontweight='bold')
-# color = 'indianred'
-# lns2 = ax1.plot(layer, f_layer*1000, linewidth=2, marker='.', markersize=5,
-#                 color=color, label='Laser power (W)')
-
-# ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-# color = 'tab:blue'
-# ax2.set_ylabel('Substrate Temperature ($^\circ$C)',
-#                color=color, fontweight='bold')
-# lns3 = ax2.plot(layer, np.full((50, ), 600),
-#                 linestyle='dashed', linewidth=3, color='blue', label='Objective Temperature')
-# lns4 = ax2.plot(layer, median_temperature, linewidth=3, marker='.',
-#                 color=color, label='Medium Temperature')
-# ax2.tick_params(axis='y', labelcolor=color)
-# lns = lns1+lns2+lns3+lns4
-# labs = [l.get_label() for l in lns]
-# plt.legend(lns, labs, loc='center right', frameafha=0.2)
-
-# plt.title("No Control Simulation", fontname="Arial Black",
-#           size=15, fontweight="bold")
-
-
-# # # ***********************
-#********************** Appendix - for later use - END
-
+# Show the plot
 plt.show()
+#********************** Plot captured frame - END
