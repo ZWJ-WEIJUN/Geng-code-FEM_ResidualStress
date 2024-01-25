@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle,Rectangle
 from matplotlib.ticker import FormatStrFormatter
 
 
@@ -115,7 +115,7 @@ cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(temp_layers.shape[0]):
     for j in range(temp_layers.shape[1]):
-        plt.text(j, i, format(temp_layers[i, j], '.0f'),
+        plt.text(j, i, format(temp_layers[i, j], '.2f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if temp_layers[i, j] > 900 else "black", fontsize=8)
@@ -155,20 +155,21 @@ plt.grid(True)
 for index, frame_index_i in enumerate(Frame_index):
     print(frame_index_i)
     # Extract the frame at index i from Frame_history
-    frame = Frame_history[frame_index_i]
+    frame = Frame_history[frame_index_i+1]  # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0,0, 1, 2...], so I need to add 1 to frame_index_i
 
     # Create a new figure with a custom size
     fig, ax = plt.subplots()
 
     imge_coord = get_image_coord(index+1)
 
-    print(f"For the layer #{index+1} , in captured frame #{frame_index_i}, the image coordinate used for calculation is:{imge_coord}")
+    print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord}")
 
     for j in imge_coord:
         center = tuple(j)
-        radius = 1 
-        circle = Circle(center, radius, color = 'yellow', fill=False,linewidth=2)
-        ax.add_patch(circle)
+        square_size = 1 
+        bottom_left_corner = (center[0] - square_size/2, center[1] - square_size/2)
+        square = Rectangle(bottom_left_corner, square_size, square_size, color='yellow')  # Create a square
+        ax.add_patch(square)
 
     # Display the first frame as an image
     plt.imshow(frame, cmap='coolwarm', interpolation='nearest')
