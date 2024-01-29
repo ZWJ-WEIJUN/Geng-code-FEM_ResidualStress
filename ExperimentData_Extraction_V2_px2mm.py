@@ -43,9 +43,9 @@ def get_image_coord(Layer,Frame_array,Frame_history):
     
     for i in range(N_Change):
         x_i = x_start
-        y_i = y_start + i*L_Change/2
-        y_f = y_start + Length - i*L_Change/2
-        z_i = z_start
+        y_i = y_start + 5 + i*L_Change/2            # Here +5 is to make sure the first location for collecting data is not on the edge of the thin wall but at y = 13 mm
+        y_f = y_start - 5 + Length - i*L_Change/2   # Here -5 is to make sure the last location for collecting data is not on the edge of the thin wall but at y = 73 mm   
+        z_i = z_start     
         L_inc = (y_f-y_i)/(N_Data_perLayer - 1)
         for j in range(Layer_Change):
             x_coord = x_i
@@ -84,7 +84,7 @@ def get_image_coord(Layer,Frame_array,Frame_history):
         if np.any(local_search):
             local_high_temp = np.max(local_search)
             index = np.unravel_index(np.argmax(local_search), np.shape(local_search))
-            max_coord = [index[1]+ic[0]-column,index[0]+ic[1]-row]
+            max_coord = [index[1]+ic[0]-column,index[0]+ic[1]-row]  #the coordinate of the max temperature in the local search area
         else:
             local_high_temp = temperature_data[ic[1],ic[0]]
         New_MT.append(local_high_temp)
@@ -96,7 +96,7 @@ def get_image_coord(Layer,Frame_array,Frame_history):
     Search_coord = np.array(Search_coord) # The coordinate of the max temperature in the local search area
     # Index_test=np.array(Index_test)
     
-    return image_coord, New_MT, Search_coord, Length, N_Data_perLayer
+    return image_coord, New_MT, Search_coord, y_i, y_f, N_Data_perLayer
 
 
 # ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - END
@@ -125,7 +125,7 @@ Medium_temperature = np.median(temp_layers, axis=1)
 #Create new temperature distribution with new methond
 New_temp_layer =[]
 for i in range (1,len(frame_index)):
-   imge_coord_perLayer, New_MT,Search_coord, Length, N_Data_perLayer = get_image_coord(i,frame_index,Frame_history)
+   imge_coord_perLayer, New_MT,Search_coord, y_i, y_f, N_Data_perLayer = get_image_coord(i,frame_index,Frame_history)
    New_temp_layer.append(New_MT)
 
 # *** Plot Laser Power ***
@@ -234,7 +234,7 @@ for index, frame_index_i in enumerate(Frame_index):
     # Create a new figure with a custom size
     fig, ax = plt.subplots()
 
-    imge_coord_perLayer, New_MT,Search_coord, Length, N_Data_perLayer = get_image_coord(index+1,frame_index,Frame_history)
+    imge_coord_perLayer, New_MT,Search_coord, y_i, y_f, N_Data_perLayer = get_image_coord(index+1,frame_index,Frame_history)
 
     # Calculate the distance between each points in on layer in unit of pixels
     differences = np.diff(imge_coord_perLayer, axis=0)
@@ -242,7 +242,7 @@ for index, frame_index_i in enumerate(Frame_index):
     # Calculate the Euclidean distance between consecutive points
     distances_px = np.sqrt(np.sum(differences**2, axis=1))
 
-    distances_mm = Length / (N_Data_perLayer - 1)
+    distances_mm = (y_f-y_i)/ (N_Data_perLayer - 1)
 
     # Calculate the average value of factor_px2mm for the current layer and # then append the average value to the factor_px2mm_avePerlayer list
     factor_px2mm = distances_mm / distances_px
@@ -285,5 +285,5 @@ print(f"The overall average px2mm factor is: {overall_average} px/mm -- 10mm len
 
 
 # Show the plot
-# plt.show()
+plt.show()
 #********************** Plot captured frame when laser head moves away - END
