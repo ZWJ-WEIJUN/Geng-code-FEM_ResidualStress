@@ -166,9 +166,9 @@ for index, frame_index_i in enumerate(Frame_index):
 
     for j in imge_coord:
         center = tuple(j)
-        square_size = 1 
-        bottom_left_corner = (center[0] - square_size/2, center[1] - square_size/2)
-        square = Rectangle(bottom_left_corner, square_size, square_size, color='yellow')  # Create a square
+        square_size = 1.0
+        center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
+        square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='yellow')  # Create a square
         ax.add_patch(square)
 
     # Display the first frame as an image
