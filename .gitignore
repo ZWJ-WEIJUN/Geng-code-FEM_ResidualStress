@@ -2,3 +2,4 @@
 *.npy
 \squareblock_
 \thinwall_test
+.DS_Store 
