@@ -31,7 +31,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
 
     Output: 
     image_coord_ls: the image coordinate of the thin wall geometry in the 3D printing space
-    MT_RecSearch_perlayer: the max temperature acquired based on new local search method -  rectangular search method - for 8 points in each layer
+    MaxT_RecSearch_perlayer: the max temperature acquired based on new local search method -  rectangular search method - for 8 points in each layer
     """
     x_start = 20.
     y_start = 8.
@@ -120,8 +120,8 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
 
 
     image_coord_ls = [] 
-    MT_RecSearch_perlayer = []                                           # max temperature from rectangular local search
-    ic_MT_AFTER_RecSearch = []                                   # the search coord
+    MaxT_RecSearch_perlayer = []                                           # max temperature from rectangular local search
+    ic_MaxT_AFTER_RecSearch = []                                   # the search coord
     MT_SquareSearch_perlayer = []                                           # max temperature from square local search
     ic_MT_AFTER_SquareSearch = []                                   # the search coord
 
@@ -146,15 +146,15 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
         
         local_search_Rec = temperature_data[ic[1]-row:ic[1]+row+1,ic[0]-column:ic[0]+column+1]              # local search rectangular area of 21x7 pixels (21columns x 7rows)
         if np.any(local_search_Rec):
-            local_high_temp = np.max(local_search_Rec)                                                      # the max temperature in the local search area
+            local_high_temp_Rec = np.max(local_search_Rec)                                                      # the max temperature in the local search area
             index_local_search_Rec = np.unravel_index(np.argmax(local_search_Rec), np.shape(local_search_Rec))                   # the index of the max temperature in the local search area in the form of tuple with two elements (x,y) or (column, row)
             max_temp_coord = [index_local_search_Rec[1]+ic[0]-column,index_local_search_Rec[0]+ic[1]-row]                         # max_temp_coord is the coordinate of the max temperature in the big image frame after locaL serach, not in the local search area
         else:
-            local_high_temp = temperature_data[ic[1],ic[0]]      #If the local search area is empty, then the max temperature is the temperature at the current point in the big image frame
+            local_high_temp_Rec = temperature_data[ic[1],ic[0]]      #If the local search area is empty, then the max temperature is the temperature at the current point in the big image frame
             """Here is confusing, the temperature_data is 288rows by 382columns, if the origin is the top left corner of the image frame, the x axis is the horizontal axis(column), the y axis is the vertical axis (row),
             so the temepratre data is y by x, but the varaible ic is x (column) by y(row), so the temperature_data[ic[1],ic[0]] is the correct way to get the temperature at the current point in the big image frame"""
-        MT_RecSearch_perlayer.append(local_high_temp)
-        ic_MT_AFTER_RecSearch.append(max_temp_coord)    # Append the coordinate of the max temperature in the local search area to the ic_MT_AFTER_RecSearch list
+        MaxT_RecSearch_perlayer.append(local_high_temp_Rec)
+        ic_MaxT_AFTER_RecSearch.append(max_temp_coord)    # Append the coordinate of the max temperature in the local search area to the ic_MaxT_AFTER_RecSearch list
 
         local_search_Square = temperature_data[ic[1]-square_size:ic[1]+square_size,ic[0]-square_size:ic[0]+square_size]          # local search square area of 8x8 pixels (8columns x 8rows)
         if np.any(local_search_Square):
@@ -166,17 +166,17 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
             """Here is confusing, the temperature_data is 288rows by 382columns, if the origin is the top left corner of the image frame, the x axis is the horizontal axis(column), the y axis is the vertical axis (row),
             so the temepratre data is y by x, but the varaible ic is x (column) by y(row), so the temperature_data[ic[1],ic[0]] is the correct way to get the temperature at the current point in the big image frame"""
         MT_SquareSearch_perlayer.append(local_high_temp_Square)
-        ic_MT_AFTER_SquareSearch.append(max_temp_coord_Square)    # Append the coordinate of the max temperature in the local search area to the ic_MT_AFTER_RecSearch list
+        ic_MT_AFTER_SquareSearch.append(max_temp_coord_Square)    # Append the coordinate of the max temperature in the local search area to the ic_MaxT_AFTER_RecSearch list
 
    
     image_coord_ls = np.array(image_coord_ls)          # Convert the image_coord_ls list to a numpy array
-    MT_RecSearch_perlayer = np.array(MT_RecSearch_perlayer)            # Max temperature acquired based on rectangular local search method for 8 points in each layer
-    ic_MT_AFTER_RecSearch = np.array(ic_MT_AFTER_RecSearch)           # The coordinate of the max temperature in the local rectangular search area for 8 points in each layer
+    MaxT_RecSearch_perlayer = np.array(MaxT_RecSearch_perlayer)            # Max temperature acquired based on rectangular local search method for 8 points in each layer
+    ic_MaxT_AFTER_RecSearch = np.array(ic_MaxT_AFTER_RecSearch)           # The coordinate of the max temperature in the local rectangular search area for 8 points in each layer
     MT_SquareSearch_perlayer = np.array(MT_SquareSearch_perlayer)            # Max temperature acquired based on suqare local search method for 8 points in each layer
     ic_MT_AFTER_SquareSearch = np.array(ic_MT_AFTER_SquareSearch)           # The coordinate of the max temperature in the local square search area for 8 points in each layer
     # Index_test=np.array(Index_test)
     
-    return image_coord_ls, MT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer
+    return image_coord_ls, MaxT_RecSearch_perlayer, ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer
 
 
 # ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - END
@@ -203,13 +203,15 @@ Medium_temperature_SqaureSearch = np.median(MT_OriginSquareSearch_alllayers, axi
 
 
 
-# Create new temperature distribution with new rectangualr search methond
+# Create new temperature distribution with rectangualr search methond
 MT_RecSearch_alllayers =[]
 for layer_num in range (1,len(frame_index)):
-   imge_coord_perLayer, MT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(layer_num,frame_index,Frame_history)
-   MT_RecSearch_alllayers.append(MT_RecSearch_perlayer)
+   imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(layer_num,frame_index,Frame_history)
+   MT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
 
 Medium_temperature_RecSearch = np.median(MT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
+# Save the Medium_temperature_RecSearch array to a file - npy file has already saved
+# np.save('Medium_temperature_RecSearch_7(row)x31(column).npy', Medium_temperature_RecSearch)
 
 
 # *** Plot Laser Power ***
@@ -323,7 +325,7 @@ for index, frame_index_i in enumerate(Frame_index):
     # Create a new figure with a custom size
     fig, ax = plt.subplots()
 
-    imge_coord_perLayer, MT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(index+1,frame_index,Frame_history)
+    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(index+1,frame_index,Frame_history)
 
     # Calculate the distance between each points in on layer in unit of pixels
     differences = np.diff(imge_coord_perLayer, axis=0)
@@ -351,7 +353,7 @@ for index, frame_index_i in enumerate(Frame_index):
         ax.add_patch(square)
 
     # Add the max temperature point for each layer based on the rectangular search method
-    for k in ic_MT_AFTER_RecSearch:
+    for k in ic_MaxT_AFTER_RecSearch:
         center = tuple(k)
         square_size = 1.0
         center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
