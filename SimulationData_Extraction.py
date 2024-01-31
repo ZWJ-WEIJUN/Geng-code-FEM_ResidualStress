@@ -53,7 +53,7 @@ color = 'indianred'
 lns1 = ax1.plot(layer, lp_layer, linewidth=3, marker='.', markersize=10,
                 color=color, label='Laser power')
 ax1.tick_params(axis='y', labelcolor=color)
-ax1.set_xlabel("Layer #")
+ax1.set_xlabel("Layer #",  fontweight='bold')
 ax1.set_ylabel("Laser Power (kW)", color=color, fontweight='bold')
 
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
