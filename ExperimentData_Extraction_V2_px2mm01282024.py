@@ -288,6 +288,10 @@ plt.title('Temperature Distribution - Rectangular Search 31 (column) x 11 (row) 
 
 
 #********************** Plot laser power, medium temperature for laser power-based energy ctrl vs. No Ctrl - START  
+# Load the Medium_temperature_RecSearch array from the file
+Medium_temperature_RecSearch31x7 = np.load('Medium_temperature_RecSearch_7(row)x31(column).npy')
+# *************************************************************************
+
 plt.rcParams["font.weight"] = "bold"
 fig, ax1 = plt.subplots(figsize=(10, 8))  # Create a new figure with a custom size
 
@@ -309,13 +313,12 @@ color_objT = 'blue'
 # Plot Medium_temperature_OriginalRectSearch against the layer number
 lns2 = ax2.plot(layer, np.full((40, ), 1100),
                 linestyle='dashed', linewidth=3, color=color_objT, label='Objective Temperature')
-lns3 = ax2.plot(layer, Medium_temperature_OriginalRectSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color=color_T,label='Medium Temperature - Experimental Rectangular Search  31 (column) x 7 (row) pixels')
+lns3 = ax2.plot(layer, Medium_temperature_OriginalRectSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color=color_T,label='Medium Temperature - LP Ctrl')
 # Plot Medium_temperature_RecSearch
-lns4 = ax2.plot(layer, Medium_temperature_RecSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color='green', label ='Medium Temperature - Rectangular Search 31 (column) x 11 (row) pixels')
+# lns4 = ax2.plot(layer, Medium_temperature_RecSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color='green', label ='Medium Temperature - Rectangular Search 31 (column) x 11 (row) pixels')
+lns4 = ax2.plot(layer, Medium_temperature_RecSearch31x7, linewidth=3, marker='.', markersize=10, linestyle='-', color='black', label ='Medium Temperature - No Ctrl')
 ax2.set_ylabel('Medium_temperature ($^\circ$C)', color=color_T, fontweight='bold')
 ax2.tick_params(axis='y', labelcolor=color_T)
-
-
 
 # Set up the labels for the x and y axes
 plt.xlabel('Layer Number #')
@@ -328,15 +331,13 @@ plt.legend(lns, labs, loc='lower center', framealpha=0.2)
 
 # Set up the title for the plot
 # plt.title('Medium temperature acqureied by different search methods')
-plt.title("Laser Power-Based Online Energy Control", fontname="Arial Black",
+plt.title("Laser Power-Based Online Energy Ctrl vs. No Ctrl Thin Wall", fontname="Arial Black",
           size=15, fontweight="bold")
-
-
 
 # Add grid lines
 plt.grid(True)
 #********************** Plot medium temperature - END
-
+plt.show()
 
 #********************** Plot captured Frame when laser head moves away - START
 # Create a new list to store the average values for each layer
@@ -413,5 +414,5 @@ print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distanc
 
 
 # Show the plot
-plt.show()
+# plt.show()
 #********************** Plot captured frame when laser head moves away - END
