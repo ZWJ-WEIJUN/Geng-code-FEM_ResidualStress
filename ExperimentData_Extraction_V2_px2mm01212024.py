@@ -16,6 +16,8 @@ from matplotlib.ticker import FormatStrFormatter
 
 
 
+
+
 # ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - START
 
 def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
@@ -33,7 +35,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     """
     x_start = 20.
     y_start = 8.
-    z_start = -4.
+    z_start = -4.          # Here use -4 is due to the 4mm thickness of the calibration black gasket plate on the top of the Z0 substrate`
 
     Layer_Height = 0.7
     Length = 70.                # length of the thin wall in the y direction
