@@ -263,7 +263,7 @@ cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(MaxT_OriginRectSearch_alllayers.shape[0]):
     for j in range(MaxT_OriginRectSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MaxT_OriginRectSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MaxT_OriginRectSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if MaxT_OriginRectSearch_alllayers[i, j] > 900 else "black", fontsize=8)
@@ -292,7 +292,7 @@ cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(MaxT_RecSearch_alllayers.shape[0]):
     for j in range(MaxT_RecSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MaxT_RecSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MaxT_RecSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if MaxT_OriginRectSearch_alllayers[i, j] > 900 else "black", fontsize=8)
@@ -441,5 +441,5 @@ print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distanc
 
 
 # Show the plot
-# plt.show()
+plt.show()
 #********************** Plot captured frame when laser head moves away - END
