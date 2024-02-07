@@ -9,6 +9,9 @@ V3: Shifting method base on maximum tempearture and data extraction of original 
 """
 #V2, include local search function testing
 
+# import matplotlib
+# matplotlib.use('Agg')  # This will set the backend to 'Agg', which is a non-interactive backend. This way, the plots will not be displayed during the debug execution of the code, and you will be able to step over the code without any issues in the debug processss.
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Circle,Rectangle,Patch
@@ -54,7 +57,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
 
 
     # For look here is to get the coordinate of the thin wall geometry in the 3D printing space
-    # Total 320 data points, 8 data points per layer, 40 layers
+    # Total 630 data points, 7 data points per layer, 90 layers
     if not Coord_TW_3D:
         for i in range(N_Change):
             x_i = x_start
@@ -73,7 +76,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
                     Coord_TW_3D.append([x_coord,y_coord,z_coord])
                 # update the z coordinate after each layer
                 z_coord = round(z_coord+Layer_Height,3)
-        # Coord_TW_3D - a list contains 320 data points, 8 data points per layer, 40 layers
+        # Coord_TW_3D - a list contains 630 data points, 7 data points per layer, 90 layers
 
     # Extract Image Coordinate
     Indexi = (Layer_num - 1) *(N_Data_perLayer - 1)+(Layer_num-1)   # Indexi is the start index of the data points for the current layer
@@ -81,6 +84,8 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     Coor_CurrLayer = Coord_TW_3D[Indexi:Indexf]                       # Coor_CurrLayer is the list of the 8 eight coordinate for the current layer
                                                             # The shape of Coord_TW_3D is: (320, 3)
     Coor_CurrLayer = np.array(Coor_CurrLayer)                             # Convert Coor_CurrLayer to a numpy array
+    Length_CurrLayer = Coor_CurrLayer[N_Data_perLayer-1, 1] - Coor_CurrLayer[0, 1]       # Length_CurrLayer is the length between end temperature collecting point and the start temperature collecting point in the current layer.
+    print(f"The distance between start collection pt and end collection pt of one layer thin wall is: {Length_CurrLayer} mm")
 
 
 
@@ -88,7 +93,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     TranMat = np.load('TranMat_'+date_TranMat+'.npy')    # Size 2 x 4, 2 rows and 4 columns
     # print(f"{TranMat.shape} is the shape of the TranMat matrix.")
 
-    Coor_CurrLayer = np.append(Coor_CurrLayer, np.array([1]*(len(Coor_CurrLayer))).reshape(-1,1), axis=1) # Add a column of 1 to the Coor_CurrLayer array
+    Coor_CurrLayer_trans = np.append(Coor_CurrLayer, np.array([1]*(len(Coor_CurrLayer))).reshape(-1,1), axis=1) # Add a column of 1 to the Coor_CurrLayer array
     """??? 2. why add a column of 1 to the Coor_CurrLayer array???"""
     # [[1]
     # [1]
@@ -133,7 +138,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     # temperature_data is the temperature data for the each layer, shape is (288, 382) - Please note that 288 rows (y) and 382 columns (x)
 
     # For loop here is to get the 2D image coordinate of the thin wall geometry in the 3D printing space for each point in each layer
-    for mc in Coor_CurrLayer:
+    for mc in Coor_CurrLayer_trans:
         ic = np.round(np.matmul(TranMat,mc)).astype(int)   # mc (4x1, i.e., [20.    13.    -3.3    1.   ] ) means each machine coordinate in each layer, which is the coordinate of the thin wall geometry in the 3D printing space, after the transformation, it becomes the 2D image coordinate (ic) (2x1).
         # The astype() method creates a copy of the array, and converts the type of the data in the copy. In this case, it's converting the data to int, which means integer
 
@@ -160,7 +165,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     
     
     # return image_coord_ls, MaxT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer
-    return image_coord_ls, MaxT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer
+    return image_coord_ls, MaxT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer
 
 
 # ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - END
@@ -202,7 +207,7 @@ print(f"The median temperature for each layer based on the rectangular (31column
 # Create new temperature distribution with 31(column) by 5(row)rectangualr search methond
 MaxT_RecSearch_alllayers =[]
 for layer_num in range (1,len(frame_index)):
-   imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(layer_num,frame_index,Frame_history)
+   imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer_mm = get_image_coord_ls(layer_num,frame_index,Frame_history)
    MaxT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
 print(MaxT_OriginRectSearch_alllayers.shape)
 
@@ -349,31 +354,35 @@ factor_px2mm_avePerlayer_List = np.array([])
 
 # Iterate over the indices in Frame_index - total 40 layers
 for index, frame_index_i in enumerate(Frame_index):
-    print(f"The frame index number is: {frame_index_i}")
     # Extract the frame at index i from Frame_history
     frame = Frame_history[frame_index_i+1]  # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0, 0, 1, 2...], the first one is repeated, so here need to add 1 to frame_index_i
 
     # Create a new figure with a custom size
     fig, ax = plt.subplots()
 
-    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(index+1,frame_index,Frame_history)
+    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer_mm = get_image_coord_ls(index+1,frame_index,Frame_history)
 
     # Calculate the distance between each points in on layer in unit of pixels
+    print(f"The length of the current layer is: {Length_CurrLayer_mm} mm")
+    print(imge_coord_perLayer)
     differences = np.diff(imge_coord_perLayer, axis=0)
+    print(f"The differences between each points in on layer #{index+1} in unit of pixels is: {differences}")
 
     # Calculate the Euclidean distance between consecutive points
     distances_px = np.sqrt(np.sum(differences**2, axis=1))
+    print(f"The Euclidean distance between consecutive points in on layer #{index+1} in unit of pixels is: {distances_px}")
 
-    distances_mm = (y_f-y_i)/ (N_Data_perLayer - 1)
+    distances_mm = (Length_CurrLayer_mm)/ (N_Data_perLayer - 1)
+    print(f"The distance between each points in on layer #{index+1} in unit of mm is: {distances_mm}")
 
     # Calculate the average value of factor_px2mm for the current layer and # then append the average value to the factor_px2mm_avePerlayer list
     factor_px2mm = distances_mm / distances_px
     factor_px2mm_avePerlayer = np.mean(factor_px2mm)
     factor_px2mm_avePerlayer_List = np.append(factor_px2mm_avePerlayer_List, np.mean(factor_px2mm))
 
-    print(f"The distance between each points in on layer #{index+1} in unit of pixels is: {distances_px}, and the factor_px2mm list is: {factor_px2mm}, the average factor_px2mm is: {factor_px2mm_avePerlayer} px/mm -- 10mm length, 8 data points per layer")
+    print(f"The distance between each points in on layer #{index+1} in unit of pixels is: {distances_px}, and the factor_px2mm list is: {factor_px2mm}, the average factor_px2mm is: {factor_px2mm_avePerlayer} px/mm -- variant length (start from 10mm), 7 data points per layer")
 
-    print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord_perLayer} -- 31 x 7 Non-symmetric Search")
+    print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord_perLayer} -- 31 x 5 symmetric Search")
 
     # Add the total 8 image coordinates for a layer from the matrix transformation for each layer based on the IR camera 3Dto2D transformation calibration process
     for j in imge_coord_perLayer:
@@ -411,11 +420,11 @@ for index, frame_index_i in enumerate(Frame_index):
 
 # After the loop, calculate the overall average
 overall_average = np.mean(factor_px2mm_avePerlayer_List)
-print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, 7 data points per layer")
+print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, {N_Data_perLayer}  data points per layer")
 
 
 
 
 # Show the plot
-plt.show()
+# plt.show()
 #********************** Plot captured frame when laser head moves away - END
