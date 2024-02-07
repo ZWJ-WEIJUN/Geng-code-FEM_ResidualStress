@@ -81,6 +81,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     Coor_CurrLayer = Coord_TW_3D[Indexi:Indexf]                       # Coor_CurrLayer is the list of the 8 eight coordinate for the current layer
                                                             # The shape of Coord_TW_3D is: (320, 3)
     Coor_CurrLayer = np.array(Coor_CurrLayer)                             # Convert Coor_CurrLayer to a numpy array
+    Length_CurrLayer = Coor_CurrLayer[N_Data_perLayer-1, 1] - Coor_CurrLayer[0, 1]       # Length_CurrLayer is the length of the current layer in the y direction 
 
 
     date = '20240128'
@@ -160,7 +161,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     
     
     # return image_coord_ls, MaxT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer
-    return image_coord_ls, MaxT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer
+    return image_coord_ls, MaxT_RecSearch_perlayer, ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer
 
 
 # ************** Transformed pixel coordinates from IR camera 3Dto2D transformation calibration process - END
@@ -200,7 +201,7 @@ print(f"The median temperature for each layer based on the rectangular (31column
 # Create new temperature distribution with 31(column) by 7(row)rectangualr search methond
 MaxT_RecSearch_alllayers =[]
 for layer_num in range (1,len(frame_index)):
-   imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(layer_num,frame_index,Frame_history)
+   imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer_mm = get_image_coord_ls(layer_num,frame_index,Frame_history)
    MaxT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
 print(MaxT_OriginRectSearch_alllayers.shape)
 
@@ -337,7 +338,7 @@ plt.title("Laser Power-Based Online Energy Ctrl vs. No Ctrl Thin Wall", fontname
 # Add grid lines
 plt.grid(True)
 #********************** Plot medium temperature - END
-plt.show()
+# plt.show()
 
 #********************** Plot captured Frame when laser head moves away - START
 # Create a new list to store the average values for each layer
@@ -353,7 +354,7 @@ for index, frame_index_i in enumerate(Frame_index):
     # Create a new figure with a custom size
     fig, ax = plt.subplots()
 
-    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(index+1,frame_index,Frame_history)
+    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer_mm = get_image_coord_ls(index+1,frame_index,Frame_history)
 
     # Calculate the distance between each points in on layer in unit of pixels
     differences = np.diff(imge_coord_perLayer, axis=0)
@@ -361,7 +362,7 @@ for index, frame_index_i in enumerate(Frame_index):
     # Calculate the Euclidean distance between consecutive points
     distances_px = np.sqrt(np.sum(differences**2, axis=1))
 
-    distances_mm = (y_f-y_i)/ (N_Data_perLayer - 1)
+    distances_mm = (Length_CurrLayer_mm)/ (N_Data_perLayer - 1)
 
     # Calculate the average value of factor_px2mm for the current layer and # then append the average value to the factor_px2mm_avePerlayer list
     factor_px2mm = distances_mm / distances_px
@@ -408,7 +409,7 @@ for index, frame_index_i in enumerate(Frame_index):
 
 # After the loop, calculate the overall average
 overall_average = np.mean(factor_px2mm_avePerlayer_List)
-print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, 8 data points per layer")
+print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, {N_Data_perLayer} data points per layer")
 
 
 
