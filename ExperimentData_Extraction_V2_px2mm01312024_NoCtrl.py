@@ -246,7 +246,7 @@ cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(MaxT_OriginRectSearch_alllayers.shape[0]):
     for j in range(MaxT_OriginRectSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MaxT_OriginRectSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MaxT_OriginRectSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if MaxT_OriginRectSearch_alllayers[i, j] > 900 else "black", fontsize=8)
@@ -275,7 +275,7 @@ cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(MaxT_RecSearch_alllayers.shape[0]):
     for j in range(MaxT_RecSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MaxT_RecSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MaxT_RecSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if MaxT_OriginRectSearch_alllayers[i, j] > 900 else "black", fontsize=8)
@@ -291,7 +291,7 @@ plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
 
 plt.title('Temperature Distribution - Rectangular Search 31 (column) x 5 (row) pixels - Verification based on the captured temeprature frame')  # Add a title to the plot
 #***********************  Heatmap plot - END
-
+plt.show()
 
 
 #********************** Plot laser power, medium temperature for laser power-based energy ctrl vs. No Ctrl - START  
