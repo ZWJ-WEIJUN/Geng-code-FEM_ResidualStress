@@ -200,12 +200,12 @@ print(f'Frame collected (np.ndarray): {Frame_history.shape}') # Because in the P
 # Due to the time stamp is not recorded for the last frame, so the time to caputre for the last frame is unknown.
 print(f'Frame index: {Frame_index}')
 # Calculate the median temperature for each layer
-Medium_temperature_OriginalRectSearch = np.median(MaxT_OriginRectSearch_alllayers, axis=1)   # Median temperature for each layer based on the rectangular (31column x 7row) search method
+Median_temperature_OriginalRectSearch = np.median(MaxT_OriginRectSearch_alllayers, axis=1)   # Median temperature for each layer based on the rectangular (31column x 7row) search method
 # When axis = 1, it means that the medians will be computed along each row of the input array. In other words, the function will calculate the median value for each row separately.
-print(f"The median temperature for each layer based on the rectangular (31column x 5row) search method is: {Medium_temperature_OriginalRectSearch}")
+print(f"The median temperature for each layer based on the rectangular (31column x 5row) search method is: {Median_temperature_OriginalRectSearch}")
 
-# Save the Medium_temperature_OriginalRectSearch array to a file - Only needs one time
-# np.save('SPTW_NOCtrl_01312024_Medium_temperature_RecSearch_5(row)x31(column).npy', Medium_temperature_OriginalRectSearch)
+# Save the Median_temperature_OriginalRectSearch array to a file - Only needs one time
+# np.save('SPTW_NOCtrl_01312024_Median_temperature_RecSearch_5(row)x31(column).npy', Median_temperature_OriginalRectSearch)
 
 
 # Create new temperature distribution with 31(column) by 5(row)rectangualr search methond
@@ -215,7 +215,7 @@ for layer_num in range (1,len(frame_index)):
    MaxT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
 print(MaxT_OriginRectSearch_alllayers.shape)
 
-Medium_temperature_RecSearch = np.median(MaxT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
+Median_temperature_RecSearch = np.median(MaxT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
 
 
 plt.rcParams["font.weight"] = "bold"
@@ -311,9 +311,9 @@ plt.title('Temperature Distribution - Rectangular Search 31 (column) x 5 (row) p
 
 
 
-#********************** Plot laser power, medium temperature for laser power-based energy ctrl vs. No Ctrl - START  
-# Load the Medium_temperature_RecSearch array from the file
-Medium_temperature_RecSearch31x5 = np.load('SPTW_NOCtrl_01312024_Medium_temperature_RecSearch_5(row)x31(column).npy', allow_pickle=True)
+#********************** Plot laser power, median temperature for laser power-based energy ctrl vs. No Ctrl - START  
+# Load the Median_temperature_RecSearch array from the file
+Median_temperature_RecSearch31x5 = np.load('SPTW_NOCtrl_01312024_Medium_temperature_RecSearch_5(row)x31(column).npy', allow_pickle=True)
 # *************************************************************************
 
 plt.rcParams["font.weight"] = "bold"
@@ -335,20 +335,20 @@ ax2 = ax1.twinx()
 color_T = 'tab:blue'
 color_objT = 'blue'
 
-# Plot Medium_temperature_OriginalRectSearch against the layer number
+# Plot Median_temperature_OriginalRectSearch against the layer number
 lns2 = ax2.plot(layer, np.full((Frame_index.shape[0], ), 1100),
                 linestyle='dashed', linewidth=3, color=color_objT, label='Objective Temperature')
-lns3 = ax2.plot(layer, Medium_temperature_OriginalRectSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color=color_T,label='Medium Temperature - LP Ctrl')
-# Plot Medium_temperature_RecSearch
-# lns4 = ax2.plot(layer, Medium_temperature_RecSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color='green', label ='Medium Temperature - Rectangular Search 31 (column) x 11 (row) pixels')
-lns4 = ax2.plot(layer, Medium_temperature_RecSearch31x5, linewidth=3, marker='.', markersize=10, linestyle='-', color='black', label ='Medium Temperature - No Ctrl')
+lns3 = ax2.plot(layer, Median_temperature_OriginalRectSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color=color_T,label='Median Temperature - LP Ctrl')
+# Plot Median_temperature_RecSearch
+# lns4 = ax2.plot(layer, Median_temperature_RecSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color='green', label ='Median Temperature - Rectangular Search 31 (column) x 11 (row) pixels')
+lns4 = ax2.plot(layer, Median_temperature_RecSearch31x5, linewidth=3, marker='.', markersize=10, linestyle='-', color='black', label ='Median Temperature - No Ctrl')
 # lns5 = ax1.plot(layer, fr_array[1:], linewidth=3, marker='.', markersize=10, color=color_fr, label='Laser power') 
-ax2.set_ylabel('Medium_temperature ($^\circ$C)', color=color_T, fontweight='bold')
+ax2.set_ylabel('Median_temperature ($^\circ$C)', color=color_T, fontweight='bold')
 ax2.tick_params(axis='y', labelcolor=color_T)
 
 # Set up the labels for the x and y axes
 plt.xlabel('Layer Number #')
-plt.ylabel('Medium Temperature (°C)')
+plt.ylabel('Median Temperature (°C)')
 
 # Add a legend
 lns = lns1+lns2+lns3+lns4
@@ -356,13 +356,13 @@ labs = [l.get_label() for l in lns]
 plt.legend(lns, labs, loc='lower center', framealpha=0.2)
 
 # Set up the title for the plot
-# plt.title('Medium temperature acqureied by different search methods')
+# plt.title('Median temperature acqureied by different search methods')
 plt.title("No Ctrl Step Thin Wall_01312024", fontname="Arial Black",
           size=15, fontweight="bold")
 
 # Add grid lines
 plt.grid(True)
-#********************** Plot medium temperature - END
+#********************** Plot median temperature - END
 # plt.show()
 
 

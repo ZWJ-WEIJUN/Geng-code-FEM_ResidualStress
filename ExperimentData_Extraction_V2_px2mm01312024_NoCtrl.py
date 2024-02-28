@@ -235,7 +235,10 @@ indices = np.arange(Frame_history.shape[0] - 2) # the shape of the Frame_history
 plt.scatter(indices, time_diff)
 plt.xlabel('Frame Index')
 plt.ylabel('Time Spent (s)')
-plt.title('Time Spent For Each Frame Collected by the IR Camera')
+plt.title('Time Spent For Each Frame Collected by the IR Camera', fontname="Arial Black",
+          size=15, fontweight="bold")
+
+
 
 # ***********************  Heatmap plot - START
 plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
