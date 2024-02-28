@@ -231,167 +231,176 @@ x_labels = np.array(second_elements, dtype=int)
 MT_OriginSquareSearch_alllayers = np.array(MT_OriginSquareSearch_alllayers, dtype=float)
 
 # ***********************  Heatmap plot - START
-plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
+plt.figure(figsize=(60, 90))  # Create a new figure with a custom size
 plt.imshow(MT_OriginSquareSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
-cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
-# cbar.ax.margins(y=0)  # Make the colorbar narrower
+cbar = plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
+cbar.ax.margins(y=0)  # Make the colorbar narrower
+cbar.ax.tick_params(labelsize=70)  # Increase the size of the ticks on the colorbar
 
 # Add numbers to each cell
 for i in range(MT_OriginSquareSearch_alllayers.shape[0]):
     for j in range(MT_OriginSquareSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MT_OriginSquareSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MT_OriginSquareSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
-                 verticalalignment = "center",
-                 color="white" if MT_OriginSquareSearch_alllayers[i, j] > 900 else "black", fontsize=8)
+                 verticalalignment="center",
+                 color="white" if MT_OriginSquareSearch_alllayers[i, j] > 900 else "black", fontsize=70)
 
 # Set up the labels for the x and y axes
-plt.xlabel('Coordinate along machine Y axis (mm)')
-plt.ylabel('Layers #')
+plt.xlabel('Coordinate along machine Y axis (mm)', fontsize=100, fontname='Arial Black')
+plt.ylabel('Layers #', fontsize=100, fontname='Arial Black')
 
 # Set up the ticks for the y axis
 plt.yticks(ticks=np.arange(MT_OriginSquareSearch_alllayers.shape[0]), labels=np.arange(1, MT_OriginSquareSearch_alllayers.shape[0] + 1)) # MT_OriginSquareSearch_alllayers.shape[0] = 40
 # Set up the ticks for the x axis
 plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
 
-plt.title('Temperature Distribution - Square Search')  # Add a title to the plot
+plt.title('Temperature Distribution - Square Search', fontname='Arial Black')  # Add a title to the plot
+
+# Save the plot as .svg format with shrinked margin
+plt.savefig('heatmap_NoCtrl_square_search.svg', bbox_inches='tight', format='svg')
+
 #***********************  Heatmap plot - END
 
 
 MT_RecSearch_alllayers = np.array(MT_RecSearch_alllayers, dtype=float)
 
 # ***********************  Heatmap plot_Rectangular Search new figure with a custom size
-plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
+plt.figure(figsize=(60, 90))  # Create a new figure with a custom size
 plt.imshow(MT_RecSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
-cbar =plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
-# cbar.ax.margins(y=0)  # Make the colorbar narrower
+cbar = plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
+cbar.ax.margins(y=0)  # Make the colorbar narrower
+cbar.ax.tick_params(labelsize=70)  # Increase the size of the ticks on the colorbar
 
 # Add numbers to each cell
 for i in range(MT_RecSearch_alllayers.shape[0]):
     for j in range(MT_RecSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MT_RecSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MT_RecSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
-                 verticalalignment = "center",
-                 color="white" if MT_OriginSquareSearch_alllayers[i, j] > 900 else "black", fontsize=8)
+                 verticalalignment="center",
+                 color="white" if MT_RecSearch_alllayers[i, j] > 900 else "black", fontsize=70)
 
 # Set up the labels for the x and y axes
-plt.xlabel('Coordinate along machine Y axis (mm)')
-plt.ylabel('Layers #')
+plt.xlabel('Coordinate along machine Y axis (mm)', fontsize=100, fontname='Arial Black')
+plt.ylabel('Layers #', fontsize=100, fontname='Arial Black')
 
 # Set up the ticks for the y axis
-plt.yticks(ticks=np.arange(MT_OriginSquareSearch_alllayers.shape[0]), labels=np.arange(1, MT_OriginSquareSearch_alllayers.shape[0] + 1)) # MT_OriginSquareSearch_alllayers.shape[0] = 40
+plt.yticks(ticks=np.arange(MT_RecSearch_alllayers.shape[0]), labels=np.arange(1, MT_RecSearch_alllayers.shape[0] + 1), fontsize=70, fontname='Arial Black') # MT_OriginSquareSearch_alllayers.shape[0] = 40
 # Set up the ticks for the x axis
-plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
+plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels, fontsize=70, fontname='Arial Black')
 
-plt.title('Temperature Distribution - Rectangular Search')  # Add a title to the plot
+plt.title('Temperature Distribution - Rectangular Search', fontname='Arial Black')  # Add a title to the plot
+
+# Save the plot as .svg format with shrinked margin
+plt.savefig('heatmap_NoCtrl_rectangular_search.svg', bbox_inches='tight', format='svg')
 #***********************  Heatmap plot - END
 
+# plt.show()  # Show the plot
 
+# #********************** Plot medium temperature - START
+# plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
+# # Plot Medium_temperature_SqaureSearch against the layer number
+# plt.plot(layer, Medium_temperature_SqaureSearch, marker='o', linestyle='-', color='purple', label='Square Search Non-symmetric 8 x 8 pixels')
+# # Plot Medium_temperature_RecSearch
+# plt.plot(layer, Medium_temperature_RecSearch, marker='o', linestyle='-', color='green', label ='Rectangular Search 21 x 7 pixels')
 
-#********************** Plot medium temperature - START
-plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
-# Plot Medium_temperature_SqaureSearch against the layer number
-plt.plot(layer, Medium_temperature_SqaureSearch, marker='o', linestyle='-', color='purple', label='Square Search Non-symmetric 8 x 8 pixels')
-# Plot Medium_temperature_RecSearch
-plt.plot(layer, Medium_temperature_RecSearch, marker='o', linestyle='-', color='green', label ='Rectangular Search 21 x 7 pixels')
+# # Set up the labels for the x and y axes
+# plt.xlabel('Layer Number #')
+# plt.ylabel('Medium Temperature (°C)')
 
-# Set up the labels for the x and y axes
-plt.xlabel('Layer Number #')
-plt.ylabel('Medium Temperature (°C)')
+# # Add a legend
+# plt.legend()
 
-# Add a legend
-plt.legend()
-
-# Set up the title for the plot
-plt.title('Medium temperature acqureied by different search methods')
-
-
-
-# Add grid lines
-plt.grid(True)
-#********************** Plot medium temperature - END
-
-
-#********************** Plot captured Frame when laser head moves away - START
-# Create a new list to store the average values for each layer
-factor_px2mm_avePerlayer = []
-factor_px2mm_avePerlayer_List = np.array([])
-
-# Iterate over the indices in Frame_index - total 40 layers
-for index, frame_index_i in enumerate(Frame_index):
-    print(f"The frame index number is: {frame_index_i}")
-    # Extract the frame at index i from Frame_history
-    frame = Frame_history[frame_index_i+1]  # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0, 0, 1, 2...], the first one is repeated, so here need to add 1 to frame_index_i
-
-    # Create a new figure with a custom size
-    fig, ax = plt.subplots()
-
-    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(index+1,frame_index,Frame_history)
-
-    # Calculate the distance between each points in on layer in unit of pixels
-    differences = np.diff(imge_coord_perLayer, axis=0)
-
-    # Calculate the Euclidean distance between consecutive points
-    distances_px = np.sqrt(np.sum(differences**2, axis=1))
-
-    distances_mm = (y_f-y_i)/ (N_Data_perLayer - 1)
-
-    # Calculate the average value of factor_px2mm for the current layer and # then append the average value to the factor_px2mm_avePerlayer list
-    factor_px2mm = distances_mm / distances_px
-    factor_px2mm_avePerlayer = np.mean(factor_px2mm)
-    factor_px2mm_avePerlayer_List = np.append(factor_px2mm_avePerlayer_List, np.mean(factor_px2mm))
-
-    print(f"The distance between each points in on layer #{index+1} in unit of pixels is: {distances_px}, and the factor_px2mm list is: {factor_px2mm}, the average factor_px2mm is: {factor_px2mm_avePerlayer} px/mm -- 10mm length, 8 data points per layer")
-
-    print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord_perLayer} -- 8 x 8 Non-symmetric Search")
-
-    # Add the total 8 image coordinates for a layer from the matrix transformation for each layer based on the IR camera 3Dto2D transformation calibration process
-    for j in imge_coord_perLayer:
-        center = tuple(j)
-        square_size = 1.0
-        center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
-        square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='yellow')  # Create a square
-        ax.add_patch(square)
-
-    # Add the max temperature point for each layer based on the rectangular search method
-    for k in ic_MaxT_AFTER_RecSearch:
-        center = tuple(k)
-        square_size = 1.0
-        center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
-        square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='green')  # Create a square
-        ax.add_patch(square)
-
-    # Add the max temperature point for each layer based on the origianl sqaure search method
-    for l in ic_MT_AFTER_SquareSearch:
-        center = tuple(l)
-        square_size = 1.0
-        center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
-        square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='purple')  # Create a square
-        ax.add_patch(square)
-
-    # Add a legend
-    legend_elements = [
-        Patch(facecolor='yellow', edgecolor='none', label='Image Coordinates (Matrix Transformation)'),
-        Patch(facecolor='green', edgecolor='none', label='Max Temperature Point (Rectangular Search)'),
-        Patch(facecolor='purple', edgecolor='none', label='Max Temperature Point (Square Search)')
-    ]
-    ax.legend(handles=legend_elements, fontsize=9, bbox_to_anchor=(0, 0), loc='lower left')
-
-    # Display the first frame as an image
-    plt.imshow(frame, cmap='coolwarm', interpolation='nearest')
-
-    # Add a colorbar to the right of the plot
-    plt.colorbar(label='Value')
-
-    # Set up the title for the plot
-    plt.title(f'Layer #{index+1}')
-
-# After the loop, calculate the overall average
-overall_average = np.mean(factor_px2mm_avePerlayer_List)
-print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, 8 data points per layer")
+# # Set up the title for the plot
+# plt.title('Medium temperature acqureied by different search methods')
 
 
 
+# # Add grid lines
+# plt.grid(True)
+# #********************** Plot medium temperature - END
 
-# Show the plot
-plt.show()
-#********************** Plot captured frame when laser head moves away - END
+
+# #********************** Plot captured Frame when laser head moves away - START
+# # Create a new list to store the average values for each layer
+# factor_px2mm_avePerlayer = []
+# factor_px2mm_avePerlayer_List = np.array([])
+
+# # Iterate over the indices in Frame_index - total 40 layers
+# for index, frame_index_i in enumerate(Frame_index):
+#     print(f"The frame index number is: {frame_index_i}")
+#     # Extract the frame at index i from Frame_history
+#     frame = Frame_history[frame_index_i+1]  # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0, 0, 1, 2...], the first one is repeated, so here need to add 1 to frame_index_i
+
+#     # Create a new figure with a custom size
+#     fig, ax = plt.subplots()
+
+#     imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(index+1,frame_index,Frame_history)
+
+#     # Calculate the distance between each points in on layer in unit of pixels
+#     differences = np.diff(imge_coord_perLayer, axis=0)
+
+#     # Calculate the Euclidean distance between consecutive points
+#     distances_px = np.sqrt(np.sum(differences**2, axis=1))
+
+#     distances_mm = (y_f-y_i)/ (N_Data_perLayer - 1)
+
+#     # Calculate the average value of factor_px2mm for the current layer and # then append the average value to the factor_px2mm_avePerlayer list
+#     factor_px2mm = distances_mm / distances_px
+#     factor_px2mm_avePerlayer = np.mean(factor_px2mm)
+#     factor_px2mm_avePerlayer_List = np.append(factor_px2mm_avePerlayer_List, np.mean(factor_px2mm))
+
+#     print(f"The distance between each points in on layer #{index+1} in unit of pixels is: {distances_px}, and the factor_px2mm list is: {factor_px2mm}, the average factor_px2mm is: {factor_px2mm_avePerlayer} px/mm -- 10mm length, 8 data points per layer")
+
+#     print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord_perLayer} -- 8 x 8 Non-symmetric Search")
+
+#     # Add the total 8 image coordinates for a layer from the matrix transformation for each layer based on the IR camera 3Dto2D transformation calibration process
+#     for j in imge_coord_perLayer:
+#         center = tuple(j)
+#         square_size = 1.0
+#         center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
+#         square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='yellow')  # Create a square
+#         ax.add_patch(square)
+
+#     # Add the max temperature point for each layer based on the rectangular search method
+#     for k in ic_MaxT_AFTER_RecSearch:
+#         center = tuple(k)
+#         square_size = 1.0
+#         center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
+#         square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='green')  # Create a square
+#         ax.add_patch(square)
+
+#     # Add the max temperature point for each layer based on the origianl sqaure search method
+#     for l in ic_MT_AFTER_SquareSearch:
+#         center = tuple(l)
+#         square_size = 1.0
+#         center_pt_of_sqaure = (center[0] - square_size/2, center[1] - square_size/2)
+#         square = Rectangle(center_pt_of_sqaure, square_size, square_size, color='purple')  # Create a square
+#         ax.add_patch(square)
+
+#     # Add a legend
+#     legend_elements = [
+#         Patch(facecolor='yellow', edgecolor='none', label='Image Coordinates (Matrix Transformation)'),
+#         Patch(facecolor='green', edgecolor='none', label='Max Temperature Point (Rectangular Search)'),
+#         Patch(facecolor='purple', edgecolor='none', label='Max Temperature Point (Square Search)')
+#     ]
+#     ax.legend(handles=legend_elements, fontsize=9, bbox_to_anchor=(0, 0), loc='lower left')
+
+#     # Display the first frame as an image
+#     plt.imshow(frame, cmap='coolwarm', interpolation='nearest')
+
+#     # Add a colorbar to the right of the plot
+#     plt.colorbar(label='Value')
+
+#     # Set up the title for the plot
+#     plt.title(f'Layer #{index+1}')
+
+# # After the loop, calculate the overall average
+# overall_average = np.mean(factor_px2mm_avePerlayer_List)
+# print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, 8 data points per layer")
+
+
+
+
+# # Show the plot
+# plt.show()
+# #********************** Plot captured frame when laser head moves away - END

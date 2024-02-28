@@ -3,3 +3,16 @@
 \squareblock_
 \thinwall_test
 .DS_Store 
+
+# Ignore all files larger than 100MB (this is not standard gitignore syntax, but a feature of some Git clients)
+*.[>1MB]
+
+# Ignore .avi files
+*.avi
+
+# Ignore the entire 'Frames' directory
+/STW70_LP_CTRL_run20240204_Frames/
+/TW70_LP_CTRL_Run20240128_Frames/
+
+# Ignore all .svg files`
+*.svg

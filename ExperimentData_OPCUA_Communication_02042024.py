@@ -37,6 +37,10 @@ with open('STW70_OPCUA_No_Ctrl_TempFrame_Saved20240204.npy', 'rb') as f:
 
 # Print the recorded temperature data collected by the IR camera during the experiment
 time_diff = np.diff(While_loop_time)
+
+print(f'The DPSS_angle is: {DPSS_angle}')
+print(f"The shape of the Whileloop_time array is {While_loop_time.shape}")
+print(f'The While_loop_time is: {While_loop_time}')
 # Print the time difference
 print(f"The shape of the Whileloop_time array is {While_loop_time.shape}")
 print(f"The time difference between each loop is: {time_diff}")
@@ -61,7 +65,7 @@ plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
 # Generate an array of indices
 indices = np.arange(Frame_history.shape[0] -2 ) # the shape of the Frame_history is (2150, 288, 382), so the first number in its shpae array is 2150.
 # Here -2 means minus the first frame with all zero pixels and minus the last frame which does not have time recorded
-plt.scatter(indices, time_diff, color='blue', label='Each while loop time duration', s=7)
+plt.scatter(indices, time_diff, color='tab:blue', label='Each while loop time duration', s=7)
 plt.scatter(indices, OPCUA_Read_Time, color='orange', label='OPCUA read time duration', s=7)
 plt.scatter(Frame_index, OPCUA_Write_Time, color='black', label='OPCUA write time duration', s=7)
 plt.xlabel('While Loop Index')
@@ -73,7 +77,7 @@ legend = plt.legend()
 # Get the legend's lines and texts
 texts = legend.get_texts()
 # Set the color of each text
-colors = ['blue', 'orange', 'black']
+colors = ['tab:blue', 'orange', 'black']
 for color, text in zip(colors, texts):
     text.set_color(color)
 
@@ -114,8 +118,11 @@ with open('STW70_OPCUA_No_Ctrl20240204.npy', 'rb') as f:
 
 # Print the recorded temperature data collected by the IR camera during the experiment
 time_diff = np.diff(While_loop_time)
-# Print the time difference
+
+print(f'The DPSS_angle is: {DPSS_angle}')
 print(f"The shape of the Whileloop_time array is {While_loop_time.shape}")
+print(f'The While_loop_time is: {While_loop_time}')
+# Print the time difference
 print(f"The time difference between each loop is: {time_diff}")
 print(f"The shape of the time difference is: {time_diff.shape}")
 print(f'Frame collected (np.ndarray): {Frame_history.shape}') # Because in the Python data collection code, the first frame is defined as 'np.zeros([palette_width.value * palette_height.value], dtype=np.unit8)', so the time stamp is not recorded for the first frame, so the shape of the Time_stamp is 1 less than the shape of the Frame_history. 
@@ -140,7 +147,7 @@ plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
 # Generate an array of indices
 indices = np.arange(While_loop_time.shape[0] - 1 ) # the shape of the While_loop_time is (2149,), so the first number in its shpae array is 2149.
 # Here -2 means minus the first frame with all zero pixels and minus the last frame which does not have time recorded
-plt.scatter(indices, time_diff, color='blue', label='Each while loop time duration', s=7)
+plt.scatter(indices, time_diff, color='tab:blue', label='Each while loop time duration', s=7)
 plt.scatter(indices, OPCUA_Read_Time, color='orange', label='OPCUA read time duration', s=7)
 plt.scatter(Frame_index, OPCUA_Write_Time, color='black', label='OPCUA write time duration', s=7)
 plt.xlabel('While Loop Index')
@@ -152,7 +159,7 @@ legend = plt.legend()
 # Get the legend's lines and texts
 texts = legend.get_texts()
 # Set the color of each text
-colors = ['blue', 'orange', 'black']
+colors = ['tab:blue', 'orange', 'black']
 for color, text in zip(colors, texts):
     text.set_color(color)
 
