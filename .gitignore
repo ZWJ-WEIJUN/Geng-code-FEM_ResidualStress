@@ -16,3 +16,5 @@
 
 # Ignore all .svg files`
 *.svg
+# Ignore all .mp4 files
+*.mp4
