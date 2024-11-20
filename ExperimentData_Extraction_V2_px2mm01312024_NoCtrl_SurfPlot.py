@@ -471,7 +471,6 @@ ax.set_xlabel('X axis of the part (mm)', fontname='Arial Black', fontsize=20)
 ax.set_ylabel('Layer #', fontname='Arial Black', fontsize=20)
 ax.set_zlabel('Temperature (°C)', fontname='Arial Black', fontsize=20)
 
-
 # Add a legend for the surface plot with larger font size
 ax.legend([surf, surf_LPCtrl, surf_FRCtrl], ['No Ctrl', 'LP Ctrl', 'FR Ctrl'], loc='lower center', bbox_to_anchor=(0.5, 0.0), ncol=3, fontsize=20)
 
@@ -482,9 +481,6 @@ ax.view_init(elev=10, azim=-30)
 # plt.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/SVG_figures/Surface_STW_TemperatureComparison-Ro-30Deg.svg', bbox_inches='tight', format='svg')
 
 # ***********************  3D Surface plot No_Ctrl & LP_Ctrl - END
-
-
-
 plt.show()  # Show the plot
 
 

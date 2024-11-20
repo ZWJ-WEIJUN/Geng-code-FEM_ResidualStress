@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Circle,Rectangle,Patch
 from matplotlib.ticker import FormatStrFormatter
 
-
+print('Program started')
 
 
 
@@ -25,7 +25,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     Description: This function is used to get the image coordinate of the thin wall geometry in the 3D printing space
 
     Input: 
-    Layer_num: the layer number of the thin wall, from 1 to 40, no Zero
+    Layer_num: the layer number of the thin wall, from 1 to 40, no Zero 
     Frame_index: the index of the frame that collected by the IR camera by the laser head moves away from the thin wall in 115mm distance (See G-code for more details https://ucdavis.box.com/s/67t2ogax3nkozbp8f9tc4a4sy6bcqimw)
     Frame_history: the temperature data collected by the IR camera during the experiment frame by frame
 
@@ -200,101 +200,101 @@ with open('TW70_NCFR1000_Run20240121.npy', 'rb') as f:
 # Calculate the median temperature for each layer
 Medium_temperature_SqaureSearch = np.median(MT_OriginSquareSearch_alllayers, axis=1)   # Median temperature for each layer based on the non-symmetric square search method
 # When axis = 1, it means that the medians will be computed along each row of the input array. In other words, the function will calculate the median value for each row separately.
+# Calculate the differences between each element in the list 'Medium_temperature_SquareSearch'
 
 
+# # Create new temperature distribution with rectangualr search methond
+# MT_RecSearch_alllayers =[]
+# for layer_num in range (1,len(frame_index)):
+#    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(layer_num,frame_index,Frame_history)
+#    MT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
 
-# Create new temperature distribution with rectangualr search methond
-MT_RecSearch_alllayers =[]
-for layer_num in range (1,len(frame_index)):
-   imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MaxT_AFTER_RecSearch, ic_MT_AFTER_SquareSearch, y_i, y_f, N_Data_perLayer = get_image_coord_ls(layer_num,frame_index,Frame_history)
-   MT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
-
-Medium_temperature_RecSearch = np.median(MT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
-# Save the Medium_temperature_RecSearch array to a file - npy file has already saved
-# np.save('Medium_temperature_RecSearch_7(row)x31(column).npy', Medium_temperature_RecSearch)
-
-
-# *** Plot Laser Power ***
-plt.rcParams["font.weight"] = "bold"
-layer = np.arange(1, MT_OriginSquareSearch_alllayers.shape[0]+1, dtype=int)
-print(f'Frame collected (np.ndarray): {Frame_history.shape}')
-print(f'Frame index: {Frame_index}')
-
-print(f'Medium temperature based on origianl non-symmetric square search method: {Medium_temperature_SqaureSearch}')
-
-# Extract the first sublist from Coord_TW_3D_40layers
-first_sublist = Coord_TW_3D_40layers[0]
-# Extract the second element from each sublist in first_sublist
-second_elements = [sublist[1] for sublist in first_sublist]
-
-x_labels = np.array(second_elements, dtype=int)
-MT_OriginSquareSearch_alllayers = np.array(MT_OriginSquareSearch_alllayers, dtype=float)
-
-# ***********************  Heatmap plot - START
-plt.figure(figsize=(60, 90))  # Create a new figure with a custom size
-plt.imshow(MT_OriginSquareSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
-cbar = plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
-cbar.ax.margins(y=0)  # Make the colorbar narrower
-cbar.ax.tick_params(labelsize=70)  # Increase the size of the ticks on the colorbar
-
-# Add numbers to each cell
-for i in range(MT_OriginSquareSearch_alllayers.shape[0]):
-    for j in range(MT_OriginSquareSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MT_OriginSquareSearch_alllayers[i, j], '.1f'),
-                 horizontalalignment="center",
-                 verticalalignment="center",
-                 color="white" if MT_OriginSquareSearch_alllayers[i, j] > 900 else "black", fontsize=70)
-
-# Set up the labels for the x and y axes
-plt.xlabel('Coordinate along machine Y axis (mm)', fontsize=100, fontname='Arial Black')
-plt.ylabel('Layers #', fontsize=100, fontname='Arial Black')
-
-# Set up the ticks for the y axis
-plt.yticks(ticks=np.arange(MT_OriginSquareSearch_alllayers.shape[0]), labels=np.arange(1, MT_OriginSquareSearch_alllayers.shape[0] + 1)) # MT_OriginSquareSearch_alllayers.shape[0] = 40
-# Set up the ticks for the x axis
-plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
-
-plt.title('Temperature Distribution - Square Search', fontname='Arial Black')  # Add a title to the plot
-
-# Save the plot as .svg format with shrinked margin
-plt.savefig('heatmap_NoCtrl_square_search.svg', bbox_inches='tight', format='svg')
-
-#***********************  Heatmap plot - END
+# Medium_temperature_RecSearch = np.median(MT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
+# # Save the Medium_temperature_RecSearch array to a file - npy file has already saved
+# # np.save('Medium_temperature_RecSearch_7(row)x31(column).npy', Medium_temperature_RecSearch)
 
 
-MT_RecSearch_alllayers = np.array(MT_RecSearch_alllayers, dtype=float)
+# # *** Plot Laser Power ***
+# plt.rcParams["font.weight"] = "bold"
+# layer = np.arange(1, MT_OriginSquareSearch_alllayers.shape[0]+1, dtype=int)
+# print(f'Frame collected (np.ndarray): {Frame_history.shape}')
+# print(f'Frame index: {Frame_index}')
 
-# ***********************  Heatmap plot_Rectangular Search new figure with a custom size
-plt.figure(figsize=(60, 90))  # Create a new figure with a custom size
-plt.imshow(MT_RecSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
-cbar = plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
-cbar.ax.margins(y=0)  # Make the colorbar narrower
-cbar.ax.tick_params(labelsize=70)  # Increase the size of the ticks on the colorbar
+# print(f'Medium temperature based on origianl non-symmetric square search method: {Medium_temperature_SqaureSearch}')
 
-# Add numbers to each cell
-for i in range(MT_RecSearch_alllayers.shape[0]):
-    for j in range(MT_RecSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MT_RecSearch_alllayers[i, j], '.1f'),
-                 horizontalalignment="center",
-                 verticalalignment="center",
-                 color="white" if MT_RecSearch_alllayers[i, j] > 900 else "black", fontsize=70)
+# # Extract the first sublist from Coord_TW_3D_40layers
+# first_sublist = Coord_TW_3D_40layers[0]
+# # Extract the second element from each sublist in first_sublist
+# second_elements = [sublist[1] for sublist in first_sublist]
 
-# Set up the labels for the x and y axes
-plt.xlabel('Coordinate along machine Y axis (mm)', fontsize=100, fontname='Arial Black')
-plt.ylabel('Layers #', fontsize=100, fontname='Arial Black')
+# x_labels = np.array(second_elements, dtype=int)
+# MT_OriginSquareSearch_alllayers = np.array(MT_OriginSquareSearch_alllayers, dtype=float)
 
-# Set up the ticks for the y axis
-plt.yticks(ticks=np.arange(MT_RecSearch_alllayers.shape[0]), labels=np.arange(1, MT_RecSearch_alllayers.shape[0] + 1), fontsize=70, fontname='Arial Black') # MT_OriginSquareSearch_alllayers.shape[0] = 40
-# Set up the ticks for the x axis
-plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels, fontsize=70, fontname='Arial Black')
+# # ***********************  Heatmap plot - START
+# plt.figure(figsize=(60, 90))  # Create a new figure with a custom size
+# plt.imshow(MT_OriginSquareSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
+# cbar = plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
+# cbar.ax.margins(y=0)  # Make the colorbar narrower
+# cbar.ax.tick_params(labelsize=70)  # Increase the size of the ticks on the colorbar
 
-plt.title('Temperature Distribution - Rectangular Search', fontname='Arial Black')  # Add a title to the plot
+# # Add numbers to each cell
+# for i in range(MT_OriginSquareSearch_alllayers.shape[0]):
+#     for j in range(MT_OriginSquareSearch_alllayers.shape[1]):
+#         plt.text(j, i, format(MT_OriginSquareSearch_alllayers[i, j], '.1f'),
+#                  horizontalalignment="center",
+#                  verticalalignment="center",
+#                  color="white" if MT_OriginSquareSearch_alllayers[i, j] > 900 else "black", fontsize=70)
 
-# Save the plot as .svg format with shrinked margin
-plt.savefig('heatmap_NoCtrl_rectangular_search.svg', bbox_inches='tight', format='svg')
-#***********************  Heatmap plot - END
+# # Set up the labels for the x and y axes
+# plt.xlabel('Coordinate along machine Y axis (mm)', fontsize=100, fontname='Arial Black')
+# plt.ylabel('Layers #', fontsize=100, fontname='Arial Black')
 
-# plt.show()  # Show the plot
+# # Set up the ticks for the y axis
+# plt.yticks(ticks=np.arange(MT_OriginSquareSearch_alllayers.shape[0]), labels=np.arange(1, MT_OriginSquareSearch_alllayers.shape[0] + 1)) # MT_OriginSquareSearch_alllayers.shape[0] = 40
+# # Set up the ticks for the x axis
+# plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
+
+# plt.title('Temperature Distribution - Square Search', fontname='Arial Black')  # Add a title to the plot
+
+# # Save the plot as .svg format with shrinked margin
+# plt.savefig('heatmap_NoCtrl_square_search.svg', bbox_inches='tight', format='svg')
+
+# #***********************  Heatmap plot - END
+
+
+# MT_RecSearch_alllayers = np.array(MT_RecSearch_alllayers, dtype=float)
+
+# # ***********************  Heatmap plot_Rectangular Search new figure with a custom size
+# plt.figure(figsize=(60, 90))  # Create a new figure with a custom size
+# plt.imshow(MT_RecSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
+# cbar = plt.colorbar(label='Temperature (°C)', shrink=0.8)  # Add a colorbar to the right of the plot
+# cbar.ax.margins(y=0)  # Make the colorbar narrower
+# cbar.ax.tick_params(labelsize=70)  # Increase the size of the ticks on the colorbar
+
+# # Add numbers to each cell
+# for i in range(MT_RecSearch_alllayers.shape[0]):
+#     for j in range(MT_RecSearch_alllayers.shape[1]):
+#         plt.text(j, i, format(MT_RecSearch_alllayers[i, j], '.1f'),
+#                  horizontalalignment="center",
+#                  verticalalignment="center",
+#                  color="white" if MT_RecSearch_alllayers[i, j] > 900 else "black", fontsize=70)
+
+# # Set up the labels for the x and y axes
+# plt.xlabel('Coordinate along machine Y axis (mm)', fontsize=100, fontname='Arial Black')
+# plt.ylabel('Layers #', fontsize=100, fontname='Arial Black')
+
+# # Set up the ticks for the y axis
+# plt.yticks(ticks=np.arange(MT_RecSearch_alllayers.shape[0]), labels=np.arange(1, MT_RecSearch_alllayers.shape[0] + 1), fontsize=70, fontname='Arial Black') # MT_OriginSquareSearch_alllayers.shape[0] = 40
+# # Set up the ticks for the x axis
+# plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels, fontsize=70, fontname='Arial Black')
+
+# plt.title('Temperature Distribution - Rectangular Search', fontname='Arial Black')  # Add a title to the plot
+
+# # Save the plot as .svg format with shrinked margin
+# # plt.savefig('heatmap_NoCtrl_rectangular_search.svg', bbox_inches='tight', format='svg')
+# #***********************  Heatmap plot - END
+
+# # plt.show()  # Show the plot
 
 # #********************** Plot medium temperature - START
 # plt.figure(figsize=(10, 8))  # Create a new figure with a custom size

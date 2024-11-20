@@ -1,0 +1,97 @@
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import numpy as np
+
+
+# Load the first image
+image_path_1 = '/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/JMP_DataAnalaysis/STW_NoCtrl.jpg'
+img1 = mpimg.imread(image_path_1)
+
+# Load the second image
+image_path_2 = '/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/JMP_DataAnalaysis/STW_NoCtrl_Side.jpg'
+img2 = mpimg.imread(image_path_2)
+
+# Define the conversion factor: 1 mm = 82 pixels
+pixels_per_mm = 82
+
+# Get dimensions of the first image
+image1_width_px = img1.shape[1]  # Image width in pixels
+image1_height_px = img1.shape[0]  # Image height in pixels
+print(f'Image 1 width: {image1_width_px} px, Image 1 height: {image1_height_px} px')
+
+# Get dimensions of the second image
+image2_width_px = img2.shape[1]  # Image width in pixels
+image2_height_px = img2.shape[0]  # Image height in pixels
+print(f'Image 2 width: {image2_width_px} px, Image 2 height: {image2_height_px} px')
+
+# Convert pixel dimensions to mm
+image1_width_mm = image1_width_px / pixels_per_mm
+image1_height_mm = image1_height_px / pixels_per_mm
+image2_width_mm = image2_width_px / pixels_per_mm
+image2_height_mm = image2_height_px / pixels_per_mm
+print(f'Converted Image 1 width: {image1_width_mm:.2f} mm, Converted Image 1 height: {image1_height_mm:.2f} mm')
+print(f'Converted Image 2 width: {image2_width_mm:.2f} mm, Converted Image 2 height: {image2_height_mm:.2f} mm')
+
+
+# Flip the first image data vertically (180-degree flip)
+img1_flipped = np.fliplr(img1)
+
+# Rotate the second image data 180 degrees (clockwise)
+img2_rotated = np.fliplr(np.rot90(img2, 2))
+
+# Create a figure with two subplots side by side
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=((image1_width_mm + image2_width_mm) / 10, max(image1_height_mm, image2_height_mm) / 10))
+
+# Ensure the aspect ratio is the same for both plots to align heights
+ax1.set_aspect(aspect='auto', adjustable='box')
+ax2.set_aspect(aspect='auto', adjustable='box')
+
+# Display the first image in the first subplot
+# ax1.imshow(img1, cmap='gray', origin='lower', extent=[0, image1_width_mm, 0, image1_height_mm])
+ax1.imshow(img1_flipped, cmap='gray')
+ax1.set_xlim([0, image1_width_mm])
+ax1.set_ylim([0, image1_height_mm])
+ax1.set_xlabel('Length-Y (mm)', fontsize=17, fontweight='bold')
+ax1.set_ylabel('Height-Z (mm)', fontsize=17, fontweight='bold')
+
+
+# Set tick intervals in millimeters for the first subplot
+x_ticks_mm_1 = [i for i in range(0, int(image1_width_mm)+1, 10)]  # Setting x-ticks at every 10 mm
+y_ticks_mm_1 = [i for i in range(0, 66, 5)]  # Setting y-ticks at every 10 mm
+ax1.tick_params(axis='both', labelcolor='black',labelsize=17)
+
+# Set the tick labels based on mm for the first subplot
+ax1.set_xticks([x * pixels_per_mm for x in x_ticks_mm_1])
+ax1.set_xticklabels([f"{x:.0f}" for x in x_ticks_mm_1], fontsize=17)
+ax1.set_yticks([y * pixels_per_mm for y in y_ticks_mm_1])
+ax1.set_yticklabels([f"{y:.0f}" for y in y_ticks_mm_1], fontsize=17)
+
+# Display the second image in the second subplot
+ax2.imshow(img2_rotated, cmap='gray')
+ax2.set_xlim([0, image2_width_mm])
+ax2.set_ylim([0, image2_height_mm])
+ax2.set_xlabel('Width-X (mm)', fontsize=17, fontweight='bold')
+# ax2.set_ylabel('Height-Z (mm)', fontsize=17, fontweight='bold')
+
+# Set tick intervals in millimeters for the second subplot
+x_ticks_mm_2 = [i for i in range(0, int(image2_width_mm)+2, 1)]  # Setting x-ticks at every 10 mm
+y_ticks_mm_2 = [i for i in range(0, 66, 5)]  # Setting y-ticks at every 10 mm
+
+# Set the tick labels based on mm for the second subplot
+ax2.set_xticks([x * pixels_per_mm for x in x_ticks_mm_2])
+ax2.set_xticklabels([f"{x:.0f}" for x in x_ticks_mm_2], fontsize=17)
+ax2.set_yticks([y * pixels_per_mm for y in y_ticks_mm_2])
+# ax2.set_yticklabels([f"{y:.0f}" for y in y_ticks_mm_2], fontsize=17)
+ax2.tick_params(axis='both', labelcolor='black',labelsize=17, labelleft=False)
+
+# Increase the size of the ticks
+ax2.tick_params(axis='both', which='major', labelsize=17)
+
+# Adjust layout to reduce space between subplots
+plt.subplots_adjust(wspace=0.01)
+
+# Adjust layout to prevent overlap
+plt.tight_layout()
+
+# Display the images with the axes
+plt.show()

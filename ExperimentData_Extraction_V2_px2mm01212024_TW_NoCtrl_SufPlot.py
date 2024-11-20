@@ -433,13 +433,11 @@ ax.legend([surf, surf2, surf_diff], ['No Ctrl', 'LP Ctrl', 'Difference'], loc='u
 ax.view_init(elev=10, azim=-30)
 
 # Save the plot as .svg format with shrinked margin
-plt.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/SVG_figures/surface_TW_TemperatureComparison-Ro-30Deg.svg', bbox_inches='tight', format='svg')
+# plt.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/SVG_figures/surface_TW_TemperatureComparison-Ro-30Deg.svg', bbox_inches='tight', format='svg')
 
 # ***********************  3D Surface plot No_Ctrl & LP_Ctrl - END
 
-
-
-# plt.show()  # Show the plot
+plt.show()  # Show the plot
 
 # #********************** Plot medium temperature - START
 # plt.figure(figsize=(10, 8))  # Create a new figure with a custom size

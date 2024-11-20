@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jan 26 17:42:50 2024
+Created on Fri Feb 06 10:42:50 2024
 This code is used to extract the temperature data from the experiment IR data
 V2: Recrtangular search testing and data extraction of original data from experiment 
-V3: Shifting method base on maximum tempearture and data extraction of original data from experiment
+In this step thin wall experiment, in the experimental Python code, the temperature_history 
+
 
 @author: muqin/Weijun
 """
 #V2, include local search function testing
-
-# import matplotlib
-# matplotlib.use('Agg')  # This will set the backend to 'Agg', which is a non-interactive backend. This way, the plots will not be displayed during the debug execution of the code, and you will be able to step over the code without any issues in the debug processss.
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -34,8 +32,8 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     image_coord_ls: the image coordinate of the thin wall geometry in the 3D printing space
     MaxT_RecSearch_perlayer: the max temperature acquired based on new local search method -  rectangular search method - for 8 points in each layer
     """
-    x_start = 90.
-    y_start = 8.
+    x_start = 10.
+    y_start = 10.
     z_start = -4.               # Here use -4 is due to the 4mm thickness of the calibration black gasket plate on the top of the Z0 substrate, otherwise the z_start should be 0.
 
     Layer_Height = 0.7
@@ -57,7 +55,7 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
 
 
     # For look here is to get the coordinate of the thin wall geometry in the 3D printing space
-    # Total 630 data points, 7 data points per layer, 90 layers
+    # Total 320 data points, 8 data points per layer, 40 layers
     if not Coord_TW_3D:
         for i in range(N_Change):
             x_i = x_start
@@ -76,24 +74,23 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
                     Coord_TW_3D.append([x_coord,y_coord,z_coord])
                 # update the z coordinate after each layer
                 z_coord = round(z_coord+Layer_Height,3)
-        # Coord_TW_3D - a list contains 630 data points, 7 data points per layer, 90 layers
+        # Coord_TW_3D - a list contains 320 data points, 8 data points per layer, 40 layers
 
     # Extract Image Coordinate
     Indexi = (Layer_num - 1) *(N_Data_perLayer - 1)+(Layer_num-1)   # Indexi is the start index of the data points for the current layer
     Indexf= (Layer_num)*(N_Data_perLayer-1)+Layer_num # Indexf is the end index of the data points for the current layer
     Coor_CurrLayer = Coord_TW_3D[Indexi:Indexf]                       # Coor_CurrLayer is the list of the 8 eight coordinate for the current layer
-                                                            # The shape of Coord_TW_3D is: (320, 3)
-    Coor_CurrLayer = np.array(Coor_CurrLayer)                             # Convert Coor_CurrLayer to a numpy array
+                                                                      # The shape of Coord_TW_3D is: (320, 3)
+    Coor_CurrLayer = np.array(Coor_CurrLayer)                         # Convert Coor_CurrLayer to a numpy array
     Length_CurrLayer = Coor_CurrLayer[N_Data_perLayer-1, 1] - Coor_CurrLayer[0, 1]       # Length_CurrLayer is the length between end temperature collecting point and the start temperature collecting point in the current layer.
-    print(f"The distance between start collection pt and end collection pt of one layer thin wall is: {Length_CurrLayer} mm")
 
 
 
-    date_TranMat = '20240121'
+    date_TranMat = '20240204'
     TranMat = np.load('TranMat_'+date_TranMat+'.npy')    # Size 2 x 4, 2 rows and 4 columns
     # print(f"{TranMat.shape} is the shape of the TranMat matrix.")
 
-    Coor_CurrLayer_trans = np.append(Coor_CurrLayer, np.array([1]*(len(Coor_CurrLayer))).reshape(-1,1), axis=1) # Add a column of 1 to the Coor_CurrLayer array
+    Coor_CurrLayer = np.append(Coor_CurrLayer, np.array([1]*(len(Coor_CurrLayer))).reshape(-1,1), axis=1) # Add a column of 1 to the Coor_CurrLayer array
     """??? 2. why add a column of 1 to the Coor_CurrLayer array???"""
     # [[1]
     # [1]
@@ -132,13 +129,11 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
     column = 15
     row = 2
 
-  
-    Frame_index_per_layer = Frame_index[Layer_num]
-    temperature_data = Frame_history[Frame_index_per_layer+1] # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0, 0, 1, 2...], the first one is repeated, so here need to add 1 to frame_index_i
+    temperature_data = Frame_history[Layer_num] # Here the the first element in the Frame_history array is all zeros. The Layer_num starts from 1.
     # temperature_data is the temperature data for the each layer, shape is (288, 382) - Please note that 288 rows (y) and 382 columns (x)
 
     # For loop here is to get the 2D image coordinate of the thin wall geometry in the 3D printing space for each point in each layer
-    for mc in Coor_CurrLayer_trans:
+    for mc in Coor_CurrLayer:
         ic = np.round(np.matmul(TranMat,mc)).astype(int)   # mc (4x1, i.e., [20.    13.    -3.3    1.   ] ) means each machine coordinate in each layer, which is the coordinate of the thin wall geometry in the 3D printing space, after the transformation, it becomes the 2D image coordinate (ic) (2x1).
         # The astype() method creates a copy of the array, and converts the type of the data in the copy. In this case, it's converting the data to int, which means integer
 
@@ -172,9 +167,9 @@ def get_image_coord_ls(Layer_num: int,Frame_index,Frame_history):
 
 
 
-with open('STW70_NO_CTRL_run20240131.npy', 'rb') as f:
+with open('STW70_Combined_Ctrl_run_1200_Obj_Two_Switch20240407.npy', 'rb') as f:
     MaxT_OriginRectSearch_alllayers = np.load(f, allow_pickle=True)  # MaxT_OriginRectSearch_alllayers is a np.ndarray that contains the temperature data collected by the IR camera during the experiment, shape is (40, 8)
-    Coord_TW_3D_40layers = np.load(f, allow_pickle=True) # Coord_TW_3D_40layers is the thin wall coordinate in 3D, shape is (40, 8, 3)  
+    Coord_STW_3D_90layers = np.load(f, allow_pickle=True) # Coord_STW_3D_90layers is the thin wall coordinate in 3D, shape is (40, 8, 3)  
     lp_array = np.load(f, allow_pickle=True)
     fr_array = np.load(f, allow_pickle=True)
     Frame_history = np.load(f, allow_pickle=True) # Frame_history is a np.ndarray that contains all the frames collected by the IR camera during the experiment
@@ -183,25 +178,44 @@ with open('STW70_NO_CTRL_run20240131.npy', 'rb') as f:
     frame_index = np.load(f, allow_pickle=True)
     # Exclude the first element of Frame_index because the first element is ZERO, which is not a valid index for the Frame_history.
     Frame_index = frame_index[1:] # Frame_index is the index of the frame 1-40 that collected by the IR camera by the laser head moves away from the thin wall
-    Time_Stamp = np.load(f, allow_pickle=True) # Time_Stamp is the time stamp for each frame collected by the IR camera during the experiment
+    OPCUA_Read_Time = np.load(f, allow_pickle=True) # OPCUA_Read_Time is the time duration for OPC UA communication read R varaibles from the machine within each frame collected by the IR camera during the experiment
+    OPCUA_Write_Time = np.load(f, allow_pickle=True) # OPCUA_Write_Time is the time duration for OPC UA communication write R varibles to the machine within each frame collected by the IR camera during the experiment
+    # While_loop_time = np.load(f, allow_pickle=True) # While_loop_time is the time duration for the while loop within each frame collected by the IR camera during the experiment and it includes the frame saving time
+    DPSS_angle = np.load(f, allow_pickle=True) # DPSS_angle is the adjustment of the angle on the DPSS for each layer of the step thin wall
 
 
+# print(f"lp_array: {lp_array}")
+# print(f"The shape of the lp_array is: {lp_array.shape}")  # The shape of the lp_array is: (91,)
+# print(f"fr_array: {fr_array}")
+# print(f"The shape of the fr_array is: {fr_array.shape}")  # The shape of the fr_array is: (91,)
 # Print the recorded temperature data collected by the IR camera during the experiment
-time_diff = np.diff(Time_Stamp)
-# Print the time difference
-print(f"The shape of the Time_stamp is {Time_Stamp.shape}")
-print(f"The time difference between each loop is: {time_diff}")
-print(f"The shape of the time difference is: {time_diff.shape}")
+
+# # Print the recorded temperature data collected by the IR camera during the experiment
+# time_diff = np.diff(While_loop_time)
+    
+# # Print the time difference
+# print(f"The shape of the Whileloop_time array is {While_loop_time.shape}")
+# print(f"The time difference between each loop is: {time_diff}")
+# print(f"The shape of the time difference is: {time_diff.shape}")
+    
+print(f"The shape of the OPCUA_Read_Time is {OPCUA_Read_Time.shape}")
+print(f"The read time of OPCUA in each loop is: {OPCUA_Read_Time}")
+print(f"The shape of the OPCUA_Write_Time is: {OPCUA_Write_Time.shape}")
+print(f"The write time of OPCUA in each loop is: {OPCUA_Write_Time}")
 print(f'Frame collected (np.ndarray): {Frame_history.shape}') # Because in the Python data collection code, the first frame is defined as 'np.zeros([palette_width.value * palette_height.value], dtype=np.unit8)', so the time stamp is not recorded for the first frame, so the shape of the Time_stamp is 1 less than the shape of the Frame_history. 
+
 # Due to the time stamp is not recorded for the last frame, so the time to caputre for the last frame is unknown.
 print(f'Frame index: {Frame_index}')
+print(f'The shape of the Frame_index is: {Frame_index.shape}')
 # Calculate the median temperature for each layer
-Medium_temperature_OriginalRectSearch = np.median(MaxT_OriginRectSearch_alllayers, axis=1)   # Median temperature for each layer based on the rectangular (31column x 7row) search method
+Median_temperature_OriginalRectSearch = np.median(MaxT_OriginRectSearch_alllayers, axis=1)   # Median temperature for each layer based on the rectangular (31column x 7row) search method
 # When axis = 1, it means that the medians will be computed along each row of the input array. In other words, the function will calculate the median value for each row separately.
-print(f"The median temperature for each layer based on the rectangular (31column x 5row) search method is: {Medium_temperature_OriginalRectSearch}")
+print(f"The median temperature for each layer based on the rectangular (31column x 5row) search method is: {Median_temperature_OriginalRectSearch}")
+print(f"The shape of the Median_temperature_OriginalRectSearch is: {Median_temperature_OriginalRectSearch.shape}")
+print(f'the array of Median_temperature_OriginalRectSearch is: {Median_temperature_OriginalRectSearch}')
 
-# Save the Medium_temperature_OriginalRectSearch array to a file - Only needs one time
-# np.save('SPTW_NOCtrl_01312024_Medium_temperature_RecSearch_5(row)x31(column).npy', Medium_temperature_OriginalRectSearch)
+# Save the Median_temperature_OriginalRectSearch array to a file - Only needs one time
+# np.save('SPTW_NOCtrl_01312024_Median_temperature_RecSearch_5(row)x31(column).npy', Median_temperature_OriginalRectSearch)
 
 
 # Create new temperature distribution with 31(column) by 5(row)rectangualr search methond
@@ -211,13 +225,13 @@ for layer_num in range (1,len(frame_index)):
    MaxT_RecSearch_alllayers.append(MaxT_RecSearch_perlayer)
 print(MaxT_OriginRectSearch_alllayers.shape)
 
-Medium_temperature_RecSearch = np.median(MaxT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
+Median_temperature_RecSearch = np.median(MaxT_RecSearch_alllayers, axis=1)   # Median temperature for each layer based on the new local search method - rectangular search method
 
 
 plt.rcParams["font.weight"] = "bold"
 layer = np.arange(1, MaxT_OriginRectSearch_alllayers.shape[0]+1, dtype=int)
-# Extract the first sublist from Coord_TW_3D_40layers
-first_sublist = Coord_TW_3D_40layers[0]
+# Extract the first sublist from Coord_STW_3D_90layers
+first_sublist = Coord_STW_3D_90layers[0]
 # Extract the second element from each sublist in first_sublist
 second_elements = [sublist[1] for sublist in first_sublist]
 
@@ -229,14 +243,30 @@ MaxT_OriginRectSearch_alllayers = np.array(MaxT_OriginRectSearch_alllayers, dtyp
 
 # Plot the time difference
 plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
-# Generate an array of indices
-indices = np.arange(Frame_history.shape[0] - 2) # the shape of the Frame_history is (1518, 288, 382), so the first number in its shpae array is 1518.
-# Here -2 means minus the first frame with all zero pixels and minus the last frame which does not have time recorded
-plt.scatter(indices, time_diff)
-plt.xlabel('Frame Index')
-plt.ylabel('Time Spent (s)')
-plt.title('Time Spent For Each Frame Collected by the IR Camera')
 
+# Generate an array of indices
+indices = np.arange(OPCUA_Read_Time.shape[0] ) # the shape of the OPCUA_Read_Time is (11600,), so the first number in its shpae array is 11600.
+# Here -1 means minus the last frame which does not have time recorded
+
+# Here -2 means minus the first frame with all zero pixels and minus the last frame which does not have time recorded
+plt.scatter(indices, OPCUA_Read_Time, color='orange', label='OPCUA read time duration', s=7)
+plt.scatter(Frame_index, OPCUA_Write_Time, color='black', label='OPCUA write time duration', s=7)
+plt.xlabel('While Loop Index')
+plt.ylabel('Time Spent (s)')
+plt.title('Python Recording Duration for 90 Frames Captured with an IR Camera and Saved as .npy Files') # Each while loop including: OPC UA communication read R varaibles from the machine, OPC UA communication write R varibles to the machine, DPSS angle adjustment, and frame reading and saving time
+
+
+legend = plt.legend() 
+# Get the legend's lines and texts
+texts = legend.get_texts()
+# Set the color of each text
+colors = ['orange', 'black']
+for color, text in zip(colors, texts):
+    text.set_color(color)
+# Set the y-axis ticks
+# plt.yticks(np.arange(0.0, 1.4, 0.1))  # This used to set the ytickes number limitation
+
+# plt.show()
 # ***********************  Heatmap plot - START
 plt.figure(figsize=(10, 8))  # Create a new figure with a custom size
 plt.imshow(MaxT_OriginRectSearch_alllayers, cmap='coolwarm', interpolation='nearest',  origin='lower', aspect=0.4)  # Create a heatmap with the data
@@ -246,7 +276,7 @@ cbar =plt.colorbar(label='Temperature (Â°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(MaxT_OriginRectSearch_alllayers.shape[0]):
     for j in range(MaxT_OriginRectSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MaxT_OriginRectSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MaxT_OriginRectSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if MaxT_OriginRectSearch_alllayers[i, j] > 900 else "black", fontsize=8)
@@ -275,7 +305,7 @@ cbar =plt.colorbar(label='Temperature (Â°C)', shrink=0.8)  # Add a colorbar to t
 # Add numbers to each cell
 for i in range(MaxT_RecSearch_alllayers.shape[0]):
     for j in range(MaxT_RecSearch_alllayers.shape[1]):
-        plt.text(j, i, format(MaxT_RecSearch_alllayers[i, j], '.2f'),
+        plt.text(j, i, format(MaxT_RecSearch_alllayers[i, j], '.1f'),
                  horizontalalignment="center",
                  verticalalignment = "center",
                  color="white" if MaxT_OriginRectSearch_alllayers[i, j] > 900 else "black", fontsize=8)
@@ -292,24 +322,23 @@ plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
 plt.title('Temperature Distribution - Rectangular Search 31 (column) x 5 (row) pixels - Verification based on the captured temeprature frame')  # Add a title to the plot
 #***********************  Heatmap plot - END
 
+# plt.show()
 
-
-#********************** Plot laser power, medium temperature for laser power-based energy ctrl vs. No Ctrl - START  
-# Load the Medium_temperature_RecSearch array from the file
-# Medium_temperature_RecSearch31x7 = np.load('Medium_temperature_RecSearch_7(row)x31(column).npy')
+#********************** Plot laser power, median temperature for laser power-based energy ctrl vs. No Ctrl - START  
+# Load the Median_temperature_RecSearch array from the file
+Median_temperature_RecSearch31x5 = np.load('SPTW_NOCtrl_01312024_Medium_temperature_RecSearch_5(row)x31(column).npy', allow_pickle=True)
 # *************************************************************************
 
 plt.rcParams["font.weight"] = "bold"
 fig, ax1 = plt.subplots(figsize=(10, 8))  # Create a new figure with a custom size
 
 color_lp = 'indianred'
+color_fr = 'tab:purple'
 # Plot the laser power on the left y-axis
-lns1 = ax1.plot(layer, lp_array[1:], linewidth=3, marker='.', markersize=10, color=color_lp, label='Laser power')
-ax1.set_ylabel('Laser Power (kW)', color=color_lp)
-ax1.tick_params(axis='y', labelcolor=color_lp, )
+lns1 = ax1.plot(layer, lp_array[1:]*1000, linewidth=3, marker='.', markersize=10, color=color_lp, label='Laser power')
+ax1.tick_params(axis='y', labelcolor=color_fr, )
 ax1.set_xlabel("Layer #", fontweight='bold')
-ax1.set_ylabel("Laser Power (kW)", color=color_lp, fontweight='bold')
-
+ax1.set_ylabel("Feed Rate (mm/s)", color=color_fr, fontweight='bold')
 
 # Create a second y-axis that shares the same x-axis
 ax2 = ax1.twinx()
@@ -317,33 +346,35 @@ ax2 = ax1.twinx()
 color_T = 'tab:blue'
 color_objT = 'blue'
 
-# Plot Medium_temperature_OriginalRectSearch against the layer number
+# Plot Median_temperature_OriginalRectSearch against the layer number
 lns2 = ax2.plot(layer, np.full((Frame_index.shape[0], ), 1100),
                 linestyle='dashed', linewidth=3, color=color_objT, label='Objective Temperature')
-lns3 = ax2.plot(layer, Medium_temperature_OriginalRectSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color=color_T,label='Medium Temperature - LP Ctrl')
-# Plot Medium_temperature_RecSearch
-# lns4 = ax2.plot(layer, Medium_temperature_RecSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color='green', label ='Medium Temperature - Rectangular Search 31 (column) x 11 (row) pixels')
-# lns4 = ax2.plot(layer, Medium_temperature_RecSearch31x7, linewidth=3, marker='.', markersize=10, linestyle='-', color='black', label ='Medium Temperature - No Ctrl')
-ax2.set_ylabel('Medium_temperature ($^\circ$C)', color=color_T, fontweight='bold')
+lns3 = ax2.plot(layer, Median_temperature_OriginalRectSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color=color_T,label='Median Temperature - LP Ctrl')
+
+# Plot Median_temperature_RecSearch
+# lns4 = ax2.plot(layer, Median_temperature_RecSearch, linewidth=3, marker='.', markersize=10, linestyle='-', color='green', label ='Median Temperature - Rectangular Search 31 (column) x 11 (row) pixels')
+lns4 = ax2.plot(layer, Median_temperature_RecSearch31x5, linewidth=3, marker='.', markersize=10, linestyle='-', color='black', label ='Median Temperature - No Ctrl')
+lns5 = ax1.plot(layer, fr_array[1:]*60, linewidth=3, marker='.', markersize=10, color=color_fr, label='Feed rate') 
+ax2.set_ylabel('Median_temperature ($^\circ$C)', color=color_T, fontweight='bold')
 ax2.tick_params(axis='y', labelcolor=color_T)
 
 # Set up the labels for the x and y axes
 plt.xlabel('Layer Number #')
-plt.ylabel('Medium Temperature (Â°C)')
+plt.ylabel('Median Temperature (Â°C)')
 
 # Add a legend
-lns = lns1+lns2+lns3
+lns = lns1+lns2+lns3+lns4+lns5
 labs = [l.get_label() for l in lns]
 plt.legend(lns, labs, loc='lower center', framealpha=0.2)
 
 # Set up the title for the plot
-# plt.title('Medium temperature acqureied by different search methods')
+# plt.title('Median temperature acqureied by different search methods')
 plt.title("No Ctrl Step Thin Wall_01312024", fontname="Arial Black",
           size=15, fontweight="bold")
 
 # Add grid lines
 plt.grid(True)
-#********************** Plot medium temperature - END
+#********************** Plot median temperature - END
 # plt.show()
 
 
@@ -354,35 +385,29 @@ factor_px2mm_avePerlayer_List = np.array([])
 
 # Iterate over the indices in Frame_index - total 40 layers
 for index, frame_index_i in enumerate(Frame_index):
-    # Extract the frame at index i from Frame_history
-    frame = Frame_history[frame_index_i+1]  # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0, 0, 1, 2...], the first one is repeated, so here need to add 1 to frame_index_i
+    frame = Frame_history[index+1]  # In the original Geng's fuzzy ctrl code, the first FOUR element of Frame_index is [0, 0, 1, 2...], the first one is repeated, so here need to add 1 to frame_index_i
 
     # Create a new figure with a custom size
     fig, ax = plt.subplots()
 
-    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer, Length_CurrLayer_mm = get_image_coord_ls(index+1,frame_index,Frame_history)
+    imge_coord_perLayer, MaxT_RecSearch_perlayer,ic_MT_AFTER_RecSearch, y_i, y_f, N_Data_perLayer,Length_CurrLayer_mm = get_image_coord_ls(index+1,frame_index,Frame_history)
 
     # Calculate the distance between each points in on layer in unit of pixels
-    print(f"The length of the current layer is: {Length_CurrLayer_mm} mm")
-    print(imge_coord_perLayer)
     differences = np.diff(imge_coord_perLayer, axis=0)
-    print(f"The differences between each points in on layer #{index+1} in unit of pixels is: {differences}")
 
     # Calculate the Euclidean distance between consecutive points
     distances_px = np.sqrt(np.sum(differences**2, axis=1))
-    print(f"The Euclidean distance between consecutive points in on layer #{index+1} in unit of pixels is: {distances_px}")
 
     distances_mm = (Length_CurrLayer_mm)/ (N_Data_perLayer - 1)
-    print(f"The distance between each points in on layer #{index+1} in unit of mm is: {distances_mm}")
 
     # Calculate the average value of factor_px2mm for the current layer and # then append the average value to the factor_px2mm_avePerlayer list
     factor_px2mm = distances_mm / distances_px
     factor_px2mm_avePerlayer = np.mean(factor_px2mm)
     factor_px2mm_avePerlayer_List = np.append(factor_px2mm_avePerlayer_List, np.mean(factor_px2mm))
 
-    print(f"The distance between each points in on layer #{index+1} in unit of pixels is: {distances_px}, and the factor_px2mm list is: {factor_px2mm}, the average factor_px2mm is: {factor_px2mm_avePerlayer} px/mm -- variant length (start from 10mm), 7 data points per layer")
+    print(f"The distance between each points in on layer #{index+1} in unit of pixels is: {distances_px}, and the factor_px2mm list is: {factor_px2mm}, the average factor_px2mm is: {factor_px2mm_avePerlayer} px/mm -- 10mm length, 8 data points per layer")
 
-    print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord_perLayer} -- 31 x 5 symmetric Search")
+    print(f"For the layer #{index+1} , in captured frame #{frame_index_i+1}, the image coordinate used for calculation is:{imge_coord_perLayer} -- 31 x 7 Non-symmetric Search")
 
     # Add the total 8 image coordinates for a layer from the matrix transformation for each layer based on the IR camera 3Dto2D transformation calibration process
     for j in imge_coord_perLayer:
@@ -420,84 +445,11 @@ for index, frame_index_i in enumerate(Frame_index):
 
 # After the loop, calculate the overall average
 overall_average = np.mean(factor_px2mm_avePerlayer_List)
-print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, {N_Data_perLayer}  data points per layer")
+print(f"The overall average px2mm factor is: {overall_average} px/mm -- {distances_mm}mm length, {N_Data_perLayer} data points per layer")
 
 
 
 
 # Show the plot
-# plt.show()
+plt.show()
 #********************** Plot captured frame when laser head moves away - END
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 0‚'`	*†H†÷ ‚'Q0‚'M10	`†He 0‚D	+‚7
- ‚50‚10
-+‚7oW²µUã—I´—ZU³ügÏ240302222347Z0
-+‚7 0¼0 ëöşñ<ÁŒj“İìÚ\tÏ/	E}5¥Şøİ Û—1i0
-+‚71‚ 0U
-+‚71G0E0
-+‚7¢€ 010	`†He  ëöşñ<ÁŒj“İìÚ\tÏ/	E}5¥Şøİ Û—0*Ò­„Œf\¾`Ò½ Aà@£OpŸ10
-+‚71‚  ‚/0‚+0«
-+‚7œ0™ P a c k a g e N a m e zm i c r o s o f t - w i n d o w s - l a n g u a g e f e a t u r e s - o c r - e s - e s - p a c k a g e - W r a p p e r   0{
-+‚7m0k O S A t t r V2 : 1 0 . 0 , 2 : 6 . 3 , 2 : 6 . 2 , 2 : 6 . 1 , 2 : 6 . 0 , 2 : 5 . 2 , 2 : 5 . 1    ‚
-Ù0‚ú0‚â 3  `ÏB©1_o³    `0	*†H†÷ 0„10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1.0,U%Microsoft Windows Production PCA 20110231116192009Z241114192009Z0p10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation10UMicrosoft Windows0‚"0	*†H†÷ ‚ 0‚
-‚ š¹î8¥`´ÿÜgÄëÕ¨dËğıØå\›$²VL]Ü÷Utëµ™åî&ÙÕG¡Dàúç»Úó‘OŞÁ•C¼»œkv¸‚Gwj,F6Ä+V³ ’ª8-™˜Ã5-u ”§u	¦@û,×»óğ%¼sJTJÏ€¸§‡Òº¹Ù…DŸ)Ì¨ƒÜÕ¯C„	}S¹Bœvz§ˆ5{j—o2ö°ãş_z±‚˜9HÒxÂÊûß¬~Ü‘Ş¢Â–[®˜ñÛÏ+6¦f}8±cEöx£}æÀ6[#ã¬Õ#¦ø—ŠZµœÃˆH¤…Ôñ‘2ËuÇ:b?ó £‚v0‚r0U%0
-+‚7
-+0UÂ«vdªLœ íMMU5G˜ÿô030EU>0<¤:0810UMicrosoft Corporation10U229879+5018250U#0€©)9Ä—xÍùOšá|U¯S0WUP0N0L J H†Fhttp://www.microsoft.com/pkiops/crl/MicWinProPCA2011_2011-10-19.crl%200a+U0S0Q+0†Ehttp://www.microsoft.com/pkiops/certs/MicWinProPCA2011_2011-10-19.crt0Uÿ0 0	*†H†÷ ‚ 5c‹Å¼#·ÀºCPîá°”ñ_)µ/Vúï‘tÊ›ä<ÅàÂU@ÈàÕò~È­Æ.ÕDI/"÷‚[Q“FééÖÕášUiØ9@qİHñ‰@MS–fÇ²3X¼Êmv[p—sN2˜§‰uˆ†X é‚]?:“ÛªŸ+:Cf;@ê×Å°iè¯®^ØæÚò«}ñ˜¬4è×–úòqşgzóŞ’¡ùÏß¯%¬&ıF7âÑØ‰sæ¯lk†7®™åñÆe€Ñ”üĞô…¹§º,¡lÍP
-íq;Ëà¯÷ºof.pÎÕxÛ‚Pâ²>¿‘y(ŞUíw0‚×0‚¿ 
-avV     0	*†H†÷ 0ˆ10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1200U)Microsoft Root Certificate Authority 20100111019184142Z261019185142Z0„10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1.0,U%Microsoft Windows Production PCA 20110‚"0	*†H†÷ ‚ 0‚
-‚ İ»¢ä.	ãçÅ÷–i¼ !½i33ï­ËT€îƒ»Å „Ù÷Ò‹ó8°«¤­-|byÿãJ?5 pãÄçkàœÀ6uéŠ1İpåÜ7µtF–([‡`#,¿ÜG¥g÷Q'rë¦É¹;S5|åÓì'¹‡ş¹É#	o¨F‘Án–<AÓË£?]jMìi%(\6ÿıC
-”à´ÏßÂâÂ['î'x0‹[*	k"‰S`,ÀhSºìIóaŒ…h	sD]}¢T+İy÷Ï5]l+\Î¼œ#‹onµ&Ù6ÃOÖ'®¹2;A’,áÇÍwèªTN÷\‡e´C¨²àmwìZ$úH £‚C0‚?0	+‚7 0U©)9Ä—xÍùOšá|U¯S0	+‚7
- S u b C A0U†0Uÿ0ÿ0U#0€ÕöVËè¢\bhÑ=”[×ÎšÄ0VUO0M0K I G†Ehttp://crl.microsoft.com/pki/crl/products/MicRooCerAut_2010-06-23.crl0Z+N0L0J+0†>http://www.microsoft.com/pki/certs/MicRooCerAut_2010-06-23.crt0	*†H†÷ ‚ ü|qQ¥yÂn²ï9>¼<Rn+?sş¨hĞH¦4MŠ–&î1FayÖÿ8.EkôÀå(¸ÚŠÛ	×ÇL
-6fjŒì×¨¤›¹â@26vÄÁZÆ¿äÀêÓ¬Ãhïb¬İTlP0X¦ë|ş”§Nôì|†sWÂR!s4Zó£ŠVÈÚ	íø‹ãÎô~®ğöŠû?ÉrS¸ë¾càã=1e°åò¬Í¤Ÿ=¨±›ÂBĞ„_Tÿ‰êºGo°sNAŸ@Ÿ_å¡*²‘sŠ!(ğÎŞs9_>«\`ìß¨Ó	éôö–…¶QˆfG¢°=*hw»‘Lb{¶ÁÇºz‡4Kbz™éÊüÎJ7É-¤W|ş=Ü¸ZúÖÄ³…:ê³Ùnäi!7ŞÑöugÓ“W^)9Èî-áÍäEs[ĞÒÎz«‚FXĞ^³g¯l5ò¼å?$â5¢
-uöV™Ôx,ÑëĞˆªñßº~,c·›#!ÄùxlâX6+‘Ì¤Ùò-ºù”@íEñÎŠ\k>«Óp*
-jà_GÑÕc
-2ò¯×6*pZåBYqKWº~ƒğ!<ôÁÅ¹“ˆE“†é± ™¾˜ËÅ•¤]bÖ c ½uw}=óE¹Ÿ—ŸËW€o3©Ïw¤bY~1‚0‚0œ0„10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1.0,U%Microsoft Windows Production PCA 20113  `ÏB©1_o³    `0	`†He  ­0	*†H†÷	1	+‚7
-0
-+‚710
-+‚70/	*†H†÷	1" sê§âÁ9ëï¦Kß+[Yv3]’Lúœ>¤óa·I0B
-+‚71402 € M i c r o s o f t¡€http://www.microsoft.com0	*†H†÷ ‚ xvÿ”ÌTéŸ!Y0-¹pÏ=êœçe…C“˜Ö}üØ±U¦ë8	UÕ¤w¦25gl"ˆ«WÎ›e-T0.ÓÄ‡òc=º!—B?3¿³•	dDS™­Ï3ß½a‚Íkµ;æÍ^jäD7mÑm4Zr¸.<h¹µÀ½Då×®s'‘·àézãqjYc2{líCO
-wvëw›q{¸‘ƒâëÏãOEŠ©´akÅn5/®‚Âî¡²ßı÷H¨0Iu‹ÂíNhµQKÖÛşPæÂJˆ©P$[}r¾Ää³©÷FÃËÔİ c‡áE®¡‚”0‚
-+‚71‚€0‚|	*†H†÷ ‚m0‚i10	`†He 0‚R*†H†÷	 ‚A‚=0‚9
-+„Y
-010	`†He  ú¨„S:Û¿vÀŠ6ÙÚğJÁÁéDØH=nú:.eÎJ:]‹20240302223248.466Z0€ô Ñ¤Î0Ë10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1%0#UMicrosoft America Operations1'0%UnShield TSS ESN:E002-05E0-D9471%0#UMicrosoft Time-Stamp Service ‚ê0‚ 0‚ 3  îÓ0²š§   î0	*†H†÷ 0|10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1&0$UMicrosoft Time-Stamp PCA 20100231206184544Z250305184544Z0Ë10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1%0#UMicrosoft America Operations1'0%UnShield TSS ESN:E002-05E0-D9471%0#UMicrosoft Time-Stamp Service0‚"0	*†H†÷ ‚ 0‚
-‚ ¾ñ¼¥×¢„‰¯1)./T¾Ñã‘ì¼ØµÄµh«#•–¼î?€ &¸´„J6ÇMqxÃ°?ÔÏx¦ŠjWÓS•Ò:I†‘±ç×ñ0šacóÌ=Ù%È¢,5ÑKÕn;Âˆ»¥U¢<ïááMıÕ6ÂÕ·’Çßt¢jcZ'Œ6°¨2@šÜ,ø&©xÀ__eg0)+—‰SmN_rmÛ†Q7]Ó‚İ×–VÍYT:‰«ˆ³ıÂÚİátzï~N¥V¬55ÔçŸk¯F2–«\¾ô:àÙòòóÆ¼´ÈGoCÉ2ùWêògÄ]/tíë7ñØ_§°-¬£%ÆÜì´°;£Oş¢Y¸êÃäu+K=ä~¨–e²ë¼üe“ã’ ÂÕÖÖ3{îŞbJ^V§QÊÉSÄbD¯chµq¾WÙ$Ãu«5oãn‡×Ïmá¸û%<²§ôËU¹³¤ïc?É¥aÌ#}m›Ù¨ }½¼ğNö0Ì8‹´/ÔNB~Xşñ}3\=a·ìZä¨Vâw¸°6dR¦dÍ'ÌhŒîÊÍ)½]cj­«q¦?Y{ı¬dÄó	7GH	ñ9·‹ƒÌöÉ"ºuØùÄªŸ#ZJGm²ÀÜçì³·¾%³#*dİr9’‘¾h7Ê”× £‚I0‚E0UˆÍ?ÙÜ ½ûÅß¶¿_Üv¦0U#0€Ÿ§] ^b]ƒôåÒe§S5ér0_UX0V0T R P†Nhttp://www.microsoft.com/pkiops/crl/Microsoft%20Time-Stamp%20PCA%202010(1).crl0l+`0^0\+0†Phttp://www.microsoft.com/pkiops/certs/Microsoft%20Time-Stamp%20PCA%202010(1).crt0Uÿ0 0U%ÿ0
-+0Uÿ€0	*†H†÷ ‚ wg /ka
-9d•¤Ø“5üÁ™£¬ç¾Åöxx}”¬ºµ-øÁz\L§[õˆë'6UºéS9ÚËiırÇçŞ²îF$«Rº †™8¢L!ôÈ£ÈÓÃ$–É¼¤Ùo®÷ÈgéãC^#¡ó€¶–$O²^£$‹P‘0’ y0Qœp‹£udd¡[ø'z¿ó²„Ò£Ğ˜}~£Æ27d)UÄ0ˆÍí5YQl_R‚“§Z7?ò9§Â]ãXMIP±ÿÈ÷¨ÎÚ-"­3„PÛ>fØáÎy™G{ü‡Òùí2=‡¹âfGÎdåçq‹
-Än ¯$ì…N†êÀ¥º0Oşşnz¾ÕÔ´º·[@'›É@}/OªØl‘›yà‘vğ!İ°Z¿íuA´Yq/ò q¥$Ùâkæ§‹ëL”İÅ0d‰#~1ÓG³=Á¦¤–¹á­&9dİ
-ò;´¼Õ`àïÓ›"¬ø4~ÔŠÑU*}Ş(€^<OğwÚ\õ¤ëºNÍÌ;S¡´ãì1à<ÅŸécbwş¤‰Ç¶S\"l[šÍ,.+q”©Èöb9ÍÎp©°CÙjİ!û§{ºTZYQ2T=»)fÑNÏ§)X‡¤®PIxâÒ¥-Á•½Ìê ˜heúé®'@0‚q0‚Y 3   Åçk›I™     0	*†H†÷ 0ˆ10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1200U)Microsoft Root Certificate Authority 20100210930182225Z300930183225Z0|10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1&0$UMicrosoft Time-Stamp PCA 20100‚"0	*†H†÷ ‚ 0‚
-‚ äá¦Lç´r!y¢Ë×$y½Õ‚ÓıîœÒ©lNuÈÊ5WölJàâ½¹>`3ÿ\OÇf÷•SqZâ~JZş¸6g…F#µÏw2Àè`}jRƒD·¦FkóÅvõ†PÜÁDÈq\Q17 
-8ní×Ø&S|9azÄªıri¯«¬ö6¾5&dÚ˜;º{3­€[~ŒRş¶èb%ÜjÏ]ôşSÏÖì…VMïİ¼¤ã‘²9,QœépiÊ6-p1È5(½ã´‡$ÃàÉ~µTÜúU˜mh;šF½í¤®z)7¬ËëƒEçFnÊ2ÕÀ†0\O,âb²Í¹âˆä–¬J»¾q©[g`Şø’‘=ı Ïs}AšFuÍÄ_4İ‰Öı¥ }~üÙEß¶r/Û}_€ºÛª~6ì6Lö+n¨Qè¿£Ñs¦M7t”4‚ğò·Gí§è™|?LÛ¯^ÂóÕØs=CNÁ39L¼Bh.ê„QFâÑ½jZasÊg¢^×(vâ3r×§ ğÂú
-×coÉ6d‹[ ¦ƒ!]_0t‘””Ø¹Pù‰aó65„GÛÜÑı²ÔÅkö\RQ]Û%º¯PzlÅrïùRÄ…“À<Û7Ç?x«E¶õ‡^ÚriÆ®{··>jâ.­ £‚İ0‚Ù0	+‚7 0#	+‚7*§RşdÄš¾‚‘<F5)Ïÿ/î0UŸ§] ^b]ƒôåÒe§S5ér0\U U0S0Q+‚7Lƒ}0A0?+3http://www.microsoft.com/pkiops/Docs/Repository.htm0U%0
-+0	+‚7
- S u b C A0U†0Uÿ0ÿ0U#0€ÕöVËè¢\bhÑ=”[×ÎšÄ0VUO0M0K I G†Ehttp://crl.microsoft.com/pki/crl/products/MicRooCerAut_2010-06-23.crl0Z+N0L0J+0†>http://www.microsoft.com/pki/certs/MicRooCerAut_2010-06-23.crt0	*†H†÷ ‚ U}ü*­á,g1$[árKü©oê\¶>NGdx±“—=13µ9×Âq6?Údl|Ğu9m»1äÂûlÑ¡”"îéfg:SMİ˜º¶xØ6.œ©‚V °¾‰èiàº	î{ßjo¾)ËnØ?HuÙŞm‚õm#TäxSu$W¹İŸó=Æóhßeö¤Vª÷•¶(U'Ğ$½@ ¿¶]='à@–8¬÷ù)‰Ã¼°T…B³ü‹‰çğjÂBRuŠ6ÂÃas.,k{n?,	xé‘²©[ßI£t¼ì‘€Ò=æJ>f;O»†ú2Ù–ôö‘öÎÆtıöLro«u0Å4°zØPş
-Xİ@<ÇTmctH,±NG-Áq¿dù$¾smÊ	½³WITdÙs×[DZ‘kŸ¤(Üg($º8Kšnû!TkjEG©ñ·®Èè‰^OÒĞLvµWT	±iD~|¡alsş
-»ìAf=iıËÁAI~~“¾Ëø;ä·¿´Î>¥1Q„¼¿Á‚¢{‰pşçµĞ(‰6ÚºLù›ÿ
-é4ø$5g+à¸æŒ™Öá"êğ'B=%”ætt[jÑ>í~ 13}¼Ëé{¿8pDÑñÈ«:Š:bÙpcSMî‚m¥Áqj´U3X³¡pfò¡‚M0‚50ù¡Ñ¤Î0Ë10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1%0#UMicrosoft America Operations1'0%UnShield TSS ESN:E002-05E0-D9471%0#UMicrosoft Time-Stamp Service¢#
-0+ ˆ£¦Õ6÷åÔX Ğİ†
-Ë£¾“ ƒ0€¤~0|10	UUS10U
-Washington10URedmond10U
-Microsoft Corporation1&0$UMicrosoft Time-Stamp PCA 20100	*†H†÷  éà@0"20240302172832Z20240303172832Z0t0:
-+„Y
-1,0*0
- éà@ 0
