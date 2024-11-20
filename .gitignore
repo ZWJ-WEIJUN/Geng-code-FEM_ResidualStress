@@ -13,6 +13,7 @@
 # Ignore the entire 'Frames' directory
 /STW70_LP_CTRL_run20240204_Frames/
 /TW70_LP_CTRL_Run20240128_Frames/
+/STW70_Combinted_Ctrl_run_1200_Obj_Two_Switch20240407_Frames/
 
 # Ignore all .svg files`
 *.svg
