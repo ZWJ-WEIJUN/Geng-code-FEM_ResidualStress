@@ -1,0 +1,121 @@
+# Define the dp_error, dp_derrordl, and dp_fr as per the updated code's structure for feed rate control
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+dp_error = [[-50, -25, 0, 25, 50]]
+dp_derrordl = [[-30, -15, 0, 15, 30]]
+dp_fr = [[60, 30, 0, -30, -60]]
+
+# Simulate the fuzzy control function using the "min-max" approach for feed rate control with updated values
+def simulate_min_max_fuzzy_control_fr(lp_current, obj_temp, activation_threshold, stable_threshold, dp_error, dp_derrordl, dp_fr):
+    e_values = np.linspace(-50, 50, 50)  # error values range
+    de_dl_values = np.linspace(-30, 30, 30)  # derrordl values range
+    
+    # Create a meshgrid for inputs (error, derrordl)
+    E, dE_dl = np.meshgrid(e_values, de_dl_values)
+    fr_incr_surface = np.zeros_like(E)
+    
+    # Iterate over the meshgrid to calculate fr_incr based on the fuzzy rules using min-max approach
+    for i in range(E.shape[0]):
+        for j in range(E.shape[1]):
+            # Simulate fuzzy control for feed rate increment (fr_incr)
+            error_p = [0., 0., 0., 0., 0.]
+            derrordl_p = [0., 0., 0., 0., 0.]
+
+            error = E[i, j]
+            derrordl = dE_dl[i, j]
+
+            # Calculate the membership probabilities for error
+            if(dp_error[0][0] >= error):
+                error_p[0] = 1.0
+            elif(dp_error[0][4] <= error):
+                error_p[4] = 1.0
+            else:
+                k = 0
+                while error > dp_error[0][k]:
+                    if error <= dp_error[0][k + 1]:
+                        error_p[k] = (dp_error[0][k + 1] - error) / (dp_error[0][k + 1] - dp_error[0][k])
+                        error_p[k + 1] = 1 - error_p[k]
+                        break
+                    else:
+                        k += 1
+
+            # Calculate the membership probabilities for derrordl
+            if(dp_derrordl[0][0] >= derrordl):
+                derrordl_p[0] = 1.0
+            elif(dp_derrordl[0][4] <= derrordl):
+                derrordl_p[4] = 1.0
+            else:
+                k = 0
+                while derrordl > dp_derrordl[0][k]:
+                    if derrordl <= dp_derrordl[0][k + 1]:
+                        derrordl_p[k] = (dp_derrordl[0][k + 1] - derrordl) / (dp_derrordl[0][k + 1] - dp_derrordl[0][k])
+                        derrordl_p[k + 1] = 1 - derrordl_p[k]
+                        break
+                    else:
+                        k += 1
+
+            # Apply the fuzzy inference rules and calculate the control_rules matrix
+            control_rules = [[min(error_p[m], derrordl_p[n]) for n in range(5)] for m in range(5)]
+
+            # Aggregation using the max operator for each fuzzy set
+            output_memberships = [0, 0, 0, 0, 0]  # Initialize with 0 for each fuzzy set (LN, SN, Z, SP, LP)
+            for m in range(5):
+                for n in range(5):
+                    applied_rule = max(0, min(m + n - 3, 4))  # Determine the fuzzy set to apply
+                    output_memberships[applied_rule] = max(output_memberships[applied_rule], control_rules[m][n])
+
+            # Defuzzification (center of gravity method)
+            area_sum = 0.0
+            weighted_area = 0.0
+            base = abs(dp_fr[0][4] - dp_fr[0][2])  # Feed rate control (FR)
+            for applied_rule in range(5):
+                area = (2 - output_memberships[applied_rule]) * output_memberships[applied_rule] * base / 2
+                area_sum += area
+                weighted_area += area * dp_fr[0][applied_rule]
+
+            # Store the fr_incr value for this (error, derrordl) pair
+            if area_sum != 0:
+                fr_incr_surface[i, j] = weighted_area / area_sum
+            else:
+                fr_incr_surface[i, j] = 0
+
+    return E, dE_dl, fr_incr_surface
+
+# Simulate the fuzzy controller's behavior for feed rate increment using min-max approach with new dp values
+E, dE_dl, fr_incr_surface = simulate_min_max_fuzzy_control_fr(0, 25, 1500, [1, 1], dp_error, dp_derrordl, dp_fr)
+
+# Plot the surface diagram for feed rate control mode with min-max approach and updated dp values
+plt.rcParams["font.weight"] = "normal"
+plt.rcParams["font.family"] = "Times New Roman"
+plt.rc('font', weight='bold')
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Create the surface plot
+surf = ax.plot_surface(E, dE_dl, fr_incr_surface, cmap='viridis')
+
+# Label the axes and add title
+ax.set_xlabel('$e$ (°C)', fontweight="bold",size=15)
+ax.set_ylabel('$\Delta$ T (°C)', fontweight="bold",size=15)
+ax.set_zlabel('$\Delta$ FR (mm/min)', fontweight="bold",size=15)
+ax.tick_params(axis='both', labelcolor='black',labelsize=15)
+# ax.set_title('Fuzzy Control (Min-Max): Feed Rate Increment Surface (Updated dp values)')
+# Set y-axis limits explicitly
+# ax.set_ylim([-30, 30])
+
+# Show color bar
+# Create an inset axes for the colorbar
+cax = ax.inset_axes([1.1, 0.15, 0.05, 0.7])  # [left, bottom, width, height]
+
+# Add a colorbar to the inset axes
+cbar = plt.colorbar(surf,cax)
+cbar.ax.tick_params(labelsize=15) 
+plt.subplots_adjust(left=0, right=0.7, top=0.95, bottom=0.15)
+plt.tight_layout()
+# Display the plot
+
+# Display the plot
+plt.show()
