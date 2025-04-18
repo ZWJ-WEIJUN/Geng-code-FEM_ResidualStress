@@ -2394,6 +2394,7 @@ def main():
     fr = 1000./60.
     lp = 1.8
     sample_interval = 100
+#Checks that each of those dimensions is an integer multiple of the corresponding mesh size (so your grid will be well‑formed).
     geo = geometry(SubH1, SubH2, SubL, SubW, CladH, CladL,
                    CladW, Width, SHM1, SHM2, CHM, LM, WM)
 #    geometry(SubH1,SubH2,SubL,SubW,CladH,CladL,CladW,Width=3.,SHM1=1.,SHM2=5.,CHM=0.7,LM=1.,WM=1.):
