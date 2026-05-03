@@ -2,8 +2,13 @@
 *.npy
 \squareblock_
 \thinwall_test
-.DS_Store 
+.DS_Store
 *.csv
+*.xlsx
+*.xls
+~$*
+__pycache__/
+*.pyc
 
 # Ignore all files larger than 100MB (this is not standard gitignore syntax, but a feature of some Git clients)
 *.[>1MB]
