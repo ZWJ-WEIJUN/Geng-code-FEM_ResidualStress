@@ -70,7 +70,7 @@ SUMMARY_DATA = [
         "color": "grey",
         "marker": "o",
         "alpha": 1.0,
-        "text_xy": (3.95, 42.5),
+        "text_xy": (3.95, 40.0),
         "ha": "left",
     },
     {
