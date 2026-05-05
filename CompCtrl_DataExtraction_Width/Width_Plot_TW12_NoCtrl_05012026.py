@@ -201,8 +201,8 @@ def plot_graph(dataframes, mid_x_values, colors, markers, alphas, labels):
     ax.axvline(x=-1.575, color='blue', linestyle='--', linewidth=2.0, label='Target Wall Edge')
     ax.axvline(x=1.575, color='blue', linestyle='--', linewidth=2.0)
 
-    ax.set_xlabel('Position x (mm)', fontweight="bold", fontsize=24)
-    ax.set_ylabel('Position y (mm)', fontweight="bold", fontsize=24)
+    ax.set_xlabel('Width - X (mm)', fontweight="bold", fontsize=24)
+    ax.set_ylabel('Height - Z (mm)', fontweight="bold", fontsize=24)
     
     # Make tick labels bold
     for label in ax.get_xticklabels():
