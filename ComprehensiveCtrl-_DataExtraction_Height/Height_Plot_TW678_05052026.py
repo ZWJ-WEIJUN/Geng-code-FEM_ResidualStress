@@ -23,12 +23,12 @@ WORKBOOK_PATH = Path(
     "/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/"
     "ComprehensiveCtrl-_DataExtraction_Height/WP_All_Height_03102026.xlsx"
 )
-TW4_QPF_CTRL_SHEET_NAME = "WP9_#3_SP_CMM_CMOS_Filtered"
-TW5_TLP_CTRL_SHEET_NAME = "WP10_#3_SP_CMM_CMOS_Filtered"
-TW6_TFR_CTRL_SHEET_NAME = "WP10_#2_SP_CMM_CMOS_Filtered"
+TW6_TFR_CTRL_SHEET_NAME    = "WP10_#2_SP_CMM_CMOS_Filtered"
+TW7_WLP_CTRL_SHEET_NAME    = "WP6_#1_SP_CMM_CMOS_Filtered"
+TW8_HYBRID_CTRL_SHEET_NAME = "WP6_#2_SP_CMM_CMOS_Filtered"
 OUTPUT_PATH = Path(
     "/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/"
-    "CompCtrl_DataExtraction_Width/Created_Figures/Height_Profile_TW456.pdf"
+    "CompCtrl_DataExtraction_Width/Created_Figures/Height_Profile_TW678.pdf"
 )
 OUTPUT_ZOOMOUT = OUTPUT_PATH.with_stem(OUTPUT_PATH.stem + "_ZoomOut")
 OUTPUT_ZOOMIN  = OUTPUT_PATH.with_stem(OUTPUT_PATH.stem + "_ZoomIn")
@@ -63,25 +63,23 @@ def _apply_ax_style(ax: plt.Axes) -> None:
 
 
 def plot_height_profile(
-    tw4_qpf_ctrl_df: pd.DataFrame,
-    tw5_tlp_ctrl_df: pd.DataFrame,
     tw6_tfr_ctrl_df: pd.DataFrame,
+    tw7_wlp_ctrl_df: pd.DataFrame,
+    tw8_hybrid_ctrl_df: pd.DataFrame,
 ) -> None:
     """Save two separate PDF figures: full height overview and zoomed target region."""
-    scatter_kwargs = dict(s=18, marker="o", linewidths=0.6)
-    zoom_kwargs    = dict(s=28, marker="o", linewidths=0.7)
-
+    # (df, color, label, marker, alpha)
     datasets = [
-        (tw4_qpf_ctrl_df, "tab:blue",   "TW4 - QPF Height Ctrl"),
-        (tw5_tlp_ctrl_df, "tab:red",    "TW5 - Compr. T-LP Ctrl"),
-        (tw6_tfr_ctrl_df, "tab:purple", "TW6 - Compr. T-FR Ctrl"),
+        (tw6_tfr_ctrl_df,    "tab:purple", "TW6 - Compr. T-FR Ctrl",             "o", 1.0),
+        (tw7_wlp_ctrl_df,    "red",        "TW7 - Compr. W-LP Ctrl",             "o", 0.7),
+        (tw8_hybrid_ctrl_df, "purple",     "TW8 - Compr. W-LP & FR Hybrid Ctrl", "s", 0.7),
     ]
 
     # ── Figure 1: ZoomOut — full height profile (0–55 mm) ────────────────────
     fig1, ax1 = plt.subplots(figsize=(11, 8.5), dpi=300)
-    for df, color, label in datasets:
+    for df, color, label, marker, alpha in datasets:
         ax1.scatter(df["x"], df["y"], color=color, edgecolors=color,
-                    label=label, **scatter_kwargs)
+                    label=label, marker=marker, alpha=alpha, s=18, linewidths=0.6)
     ax1.axhline(y=52.40, color="blue", linestyle="--", linewidth=1.5, alpha=0.8,
                 label="Target Upper Limit (52.40 mm)")
     ax1.axhline(y=50.40, color="blue", linestyle="--", linewidth=1.5, alpha=0.8,
@@ -97,9 +95,9 @@ def plot_height_profile(
 
     # ── Figure 2: ZoomIn — target region 48.5–54.5 mm ────────────────────────
     fig2, ax2 = plt.subplots(figsize=(11 * 2, 8.5 / 2), dpi=300)
-    for df, color, label in datasets:
+    for df, color, label, marker, alpha in datasets:
         ax2.scatter(df["x"], df["y"], color=color, edgecolors=color,
-                    label=label, **zoom_kwargs)
+                    label=label, marker=marker, alpha=alpha, s=28, linewidths=0.7)
     ax2.axhline(y=52.40, color="blue", linestyle="--", linewidth=2.0, alpha=0.8,
                 label="Target Upper Limit (52.40 mm)")
     ax2.axhline(y=50.40, color="blue", linestyle="--", linewidth=2.0, alpha=0.8,
@@ -118,21 +116,21 @@ def plot_height_profile(
 
 
 def main() -> None:
-    tw4_qpf_ctrl_df = load_height_profile(WORKBOOK_PATH, TW4_QPF_CTRL_SHEET_NAME)
-    tw5_tlp_ctrl_df = load_height_profile(WORKBOOK_PATH, TW5_TLP_CTRL_SHEET_NAME)
-    tw6_tfr_ctrl_df = load_height_profile(WORKBOOK_PATH, TW6_TFR_CTRL_SHEET_NAME)
+    tw6_tfr_ctrl_df    = load_height_profile(WORKBOOK_PATH, TW6_TFR_CTRL_SHEET_NAME)
+    tw7_wlp_ctrl_df    = load_height_profile(WORKBOOK_PATH, TW7_WLP_CTRL_SHEET_NAME)
+    tw8_hybrid_ctrl_df = load_height_profile(WORKBOOK_PATH, TW8_HYBRID_CTRL_SHEET_NAME)
 
-    print(f"Loaded {len(tw4_qpf_ctrl_df)} valid rows from {TW4_QPF_CTRL_SHEET_NAME}")
-    print(f"TW4 x range: {tw4_qpf_ctrl_df['x'].min():.4f} to {tw4_qpf_ctrl_df['x'].max():.4f}")
-    print(f"TW4 y range: {tw4_qpf_ctrl_df['y'].min():.4f} to {tw4_qpf_ctrl_df['y'].max():.4f}")
-    print(f"Loaded {len(tw5_tlp_ctrl_df)} valid rows from {TW5_TLP_CTRL_SHEET_NAME}")
-    print(f"TW5 x range: {tw5_tlp_ctrl_df['x'].min():.4f} to {tw5_tlp_ctrl_df['x'].max():.4f}")
-    print(f"TW5 y range: {tw5_tlp_ctrl_df['y'].min():.4f} to {tw5_tlp_ctrl_df['y'].max():.4f}")
     print(f"Loaded {len(tw6_tfr_ctrl_df)} valid rows from {TW6_TFR_CTRL_SHEET_NAME}")
     print(f"TW6 x range: {tw6_tfr_ctrl_df['x'].min():.4f} to {tw6_tfr_ctrl_df['x'].max():.4f}")
     print(f"TW6 y range: {tw6_tfr_ctrl_df['y'].min():.4f} to {tw6_tfr_ctrl_df['y'].max():.4f}")
+    print(f"Loaded {len(tw7_wlp_ctrl_df)} valid rows from {TW7_WLP_CTRL_SHEET_NAME}")
+    print(f"TW7 x range: {tw7_wlp_ctrl_df['x'].min():.4f} to {tw7_wlp_ctrl_df['x'].max():.4f}")
+    print(f"TW7 y range: {tw7_wlp_ctrl_df['y'].min():.4f} to {tw7_wlp_ctrl_df['y'].max():.4f}")
+    print(f"Loaded {len(tw8_hybrid_ctrl_df)} valid rows from {TW8_HYBRID_CTRL_SHEET_NAME}")
+    print(f"TW8 x range: {tw8_hybrid_ctrl_df['x'].min():.4f} to {tw8_hybrid_ctrl_df['x'].max():.4f}")
+    print(f"TW8 y range: {tw8_hybrid_ctrl_df['y'].min():.4f} to {tw8_hybrid_ctrl_df['y'].max():.4f}")
     print(f"Saving figure to: {OUTPUT_PATH}")
-    plot_height_profile(tw4_qpf_ctrl_df, tw5_tlp_ctrl_df, tw6_tfr_ctrl_df)
+    plot_height_profile(tw6_tfr_ctrl_df, tw7_wlp_ctrl_df, tw8_hybrid_ctrl_df)
 
 
 if __name__ == "__main__":
