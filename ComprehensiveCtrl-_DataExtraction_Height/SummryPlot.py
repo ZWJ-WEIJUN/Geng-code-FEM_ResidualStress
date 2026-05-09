@@ -22,7 +22,7 @@ OUTPUT_PATH = Path(__file__).with_name("ThinWall_Summary_Plot.pdf")
 
 TARGET_WIDTH = 3.00
 TARGET_HEIGHT = 50.40
-IDEAL_WIDTH_MAX = 3.50
+IDEAL_WIDTH_MAX = 3.75
 IDEAL_HEIGHT_MAX = 52.40
 
 X_MIN, X_MAX = 2.3, 4.5
