@@ -216,7 +216,7 @@ def plot_graph(dataframes, mid_x_values, colors, markers, alphas, labels):
     plt.legend(scatterpoints=1, loc='lower center', ncol=1, fontsize=18, markerscale=3)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    fig.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/CompCtrl_DataExtraction_Width/Created_Figures/TW456_SideProfile_NoCtrl_Comparison.pdf', bbox_inches='tight')
+    fig.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/CompCtrl_DataExtraction_Width/Created_Figures/TW89_SideProfile_Comparison.pdf', bbox_inches='tight')
     
 
 
@@ -226,9 +226,8 @@ if __name__ == '__main__':
     height_target = [0.5]
 
     tw_configs = [
-        ('TW4 - QPF Height Ctrl', 'WP9_#3_CMM_Cam_B40', 'tab:blue', 'o', 1.0),
-        ('TW5 - Compr. T-LP Ctrl', 'WP10_#3_CMM_Cam_B40', 'tab:red', 'o', 1.0),
-        ('TW6 - Compr. T-FR Ctrl', 'WP10_#2_CMM_Cam_B40', 'tab:purple', 'o', 1.0),
+        ('TW8 - Compr. W-LP & FR Hybrid Ctrl', 'WP6_#2_CMM_Cam_B40', 'purple', 's', 0.7),
+        ('TW9 - Compr. W-LP & FR Hybrid Ctrl (Higher Productivity)', 'WP8_#1_CMM_Cam_B40', 'tab:green', 'o', 1.0),
     ]
 
     results = []
@@ -305,7 +304,7 @@ if __name__ == '__main__':
     ax2.legend(scatterpoints=1, loc='upper left', ncol=1, fontsize=18, markerscale=1.5)
     ax2.grid(True, alpha=0.3)
     plt.tight_layout()
-    fig2.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/CompCtrl_DataExtraction_Width/Created_Figures/TW456_Width_Scatter.pdf', bbox_inches='tight')
+    fig2.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/CompCtrl_DataExtraction_Width/Created_Figures/TW89_Width_Scatter.pdf', bbox_inches='tight')
 
     fig3, ax3 = plt.subplots(figsize=(11, 8.5), dpi=300)
     for result in results:
@@ -336,6 +335,6 @@ if __name__ == '__main__':
     ax3.legend(scatterpoints=1, loc='upper left', ncol=1, fontsize=18, markerscale=1.5)
     ax3.grid(True, alpha=0.3)
     plt.tight_layout()
-    fig3.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/CompCtrl_DataExtraction_Width/Created_Figures/TW456_Width_Line.pdf', bbox_inches='tight')
+    fig3.savefig('/Users/zhangweijun/Documents/GitHub/Geng-code-FEM_ResidualStress/CompCtrl_DataExtraction_Width/Created_Figures/TW89_Width_Line.pdf', bbox_inches='tight')
 
     plt.show()
